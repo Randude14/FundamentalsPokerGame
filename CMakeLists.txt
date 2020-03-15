@@ -29,7 +29,7 @@ if(${GTK_PKG_FOUND})
   link_directories(${GTK_PKG_LIBRARY_DIRS})
 else()
   #print message for user:
-  message(FATAL_ERROR "gtkmm+3.0 not found. It is required. exiting.")
+  message(FATAL_ERROR "gtkmm-3.0 not found. It is required. exiting.")
 endif()
 
 #Could manually add the sources using the set command as follows:
@@ -38,10 +38,18 @@ endif()
 file(GLOB SOURCES "src/*.cpp") 
 
 #This tells cmake to create the executable based on those sources
-add_executable(Poker++ ${SOURCES})
+add_executable(poker_client ${SOURCES})
+
+# Add later when we decide the name of the server source file
+# add_executable(poker_server ${SOURCES})
 
 # tells cmake to use the required libraries (in this case glib)
-target_link_libraries (Poker++ ${GTK_PKG_LIBRARIES})
+target_link_libraries (poker_client ${GTK_PKG_LIBRARIES})
 
+# copy over glade files to build directory
 file(GLOB GLADE_FILES "src/*.glade")
 file(COPY ${GLADE_FILES} DESTINATION ".")
+
+# copy over image card files over
+file(GLOB IMAGE_FILES "src/cards/*.png")
+file(COPY ${IMAGE_FILES} DESTINATION "cards/.")

@@ -1,3 +1,0 @@
-/home/student/Desktop/Classwork/CSE3310/Project/build/CMakeFiles/rebuild_cache.dir
-/home/student/Desktop/Classwork/CSE3310/Project/build/CMakeFiles/Poker++.dir
-/home/student/Desktop/Classwork/CSE3310/Project/build/CMakeFiles/edit_cache.dir
