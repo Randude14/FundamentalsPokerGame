@@ -14,23 +14,9 @@ Create a dealer (server) that will simulate a 5 hand card poker game that will i
 
 3. Before working on the project, be sure to check that there aren't any file changes that need to be pulled from the repository.
 
+4. All header files go in the "include" directory and the source (definition) files go in the "src" directory. The build directory is for compiling and running the projects.
 
-
-
-COMPILING THE PROGRAM:
-
-Go into the build directory
-	cd build
+5. To compile the program just run the file:
+	./compile.bash
 	
-Remove all files within
-	rm -rf *
-	
-Invoke cmake to create Makefile
-	cmake ..
-	
-Run Makefile to compile the program
-	make
-	
-The client and server executables will be created
-	./poker_client
-	./poker_server
+	This will remove everything in the build directory, copy over the necessary files, create the Makefile, and invoke that Makefile to compile the program.
