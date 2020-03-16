@@ -9,6 +9,8 @@
 // when they click on the card buttons they will "flip" over (i.e. we change the card image)
 // this will indicate to the player that they want to turn these cards in, we can either check
 // the card file name or use a bool array to check if they flipped a card over.
+
+// NOTE: extern "C" must be included to connect the callback functions to the button signals
 #define CARD_CLICK(NUM)   \
 extern "C" void on_click_##NUM(void* widget, gpointer user_data)\
 {\
