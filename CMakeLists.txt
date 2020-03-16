@@ -32,19 +32,23 @@ else()
   message(FATAL_ERROR "gtkmm-3.0 not found. It is required. exiting.")
 endif()
 
-#Could manually add the sources using the set command as follows:
-#set(SOURCES src/global.cpp src/worker_thread.cpp src/main.cpp)
-# but we can just use the following to add all cpp files:
-file(GLOB SOURCES "src/*.cpp") 
-
 #This tells cmake to create the executable based on those sources
-add_executable(poker_client ${SOURCES})
+add_executable(poker_client "src/main.cpp")
 
 # Add later when we decide the name of the server source file
-# add_executable(poker_server ${SOURCES})
+add_executable(poker_server "src/dealer.cpp")
+
+# Add all source files
+file(GLOB SOURCES "src/*.cpp")
+add_library(LIB ${SOURCES}) 
+
+# link executables to our source files
+target_link_libraries (poker_client ${LIB})
+target_link_libraries (poker_server ${LIB})
 
 # tells cmake to use the required libraries (in this case glib)
 target_link_libraries (poker_client ${GTK_PKG_LIBRARIES})
+target_link_libraries (poker_server ${GTK_PKG_LIBRARIES})
 
 # copy over glade files to build directory
 file(GLOB GLADE_FILES "src/*.glade")
