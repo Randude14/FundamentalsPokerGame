@@ -494,7 +494,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card2</property>
-                    <signal name="clicked" handler="on_click_2" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -508,7 +507,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card3</property>
-                    <signal name="clicked" handler="on_click_3" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -522,7 +520,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card4</property>
-                    <signal name="clicked" handler="on_click_4" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -536,7 +533,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card5</property>
-                    <signal name="clicked" handler="on_click_5" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

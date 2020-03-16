@@ -1,4 +1,5 @@
 #include "dealer.h"
+#include <iostream>
 
 // ///////////////////////////////////////////////
 // C O N S T R U C T O R S / D E S T R U C T O R S
@@ -32,4 +33,10 @@ void exchange()
 void determine_winner()
 {
 
+}
+
+int main(int argc, char* argv[])
+{
+	std::cout << "Dealer!" << std::endl;
+	return 0;
 }
