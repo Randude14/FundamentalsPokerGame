@@ -35,7 +35,7 @@ enum class Suit
 class Card
 {
   public:
-    Card(Card_value value, Suit suit);
+    Card();
     virtual ~Card();
   private:
     Card_value value;                   // A = 1, J = 11, Q = 12, K = 13

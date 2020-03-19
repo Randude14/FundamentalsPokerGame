@@ -4,7 +4,7 @@
 // C O N S T R U C T O R S / D E S T R U C T O R S
 // ///////////////////////////////////////////////
 
-Card::Card(Card_value value, Suit suit)
+Card::Card()
 {
 
 }

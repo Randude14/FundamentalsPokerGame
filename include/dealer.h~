@@ -1,7 +1,6 @@
 #ifndef DEALER_H
 #define DEALER_H
 
-#include "game.h"
 #include <string>
 
 /*
@@ -15,7 +14,6 @@ class Dealer
     virtual ~Dealer();
     void exchange();
   private:
-    Game * game;
     void shuffle();
     void deal();
     void determine_winner();
