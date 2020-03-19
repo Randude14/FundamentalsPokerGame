@@ -15,7 +15,7 @@ class Dealer
     virtual ~Dealer();
     void exchange();
   private:
-    Game * game;
+    Game* game;
     void shuffle();
     void deal();
     void determine_winner();

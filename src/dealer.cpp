@@ -16,21 +16,21 @@ Dealer::~Dealer() { }
 // M E T H O D S
 // /////////////
 
-void shuffle()
+void Dealer::shuffle()
 {
 
 }
-void deal()
-{
-
-}
-
-void exchange()
+void Dealer::deal()
 {
 
 }
 
-void determine_winner()
+void Dealer::exchange()
+{
+
+}
+
+void Dealer::determine_winner()
 {
 
 }

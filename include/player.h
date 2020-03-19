@@ -42,4 +42,6 @@ class Player
     Gtk::ToolButton *exchange_button;   // Player->Exchange Cards
     void reset_sensitivity();           // Reset button sensitivity based on game state};
 
+};
+
 #endif // PLAYER_H

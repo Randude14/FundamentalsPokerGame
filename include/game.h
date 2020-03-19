@@ -1,7 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "dealer.h"
 #include "player.h"
 #include "card.h"
 #include <string>

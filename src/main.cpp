@@ -1,7 +1,10 @@
-#include "mainwin.h"
 #include <gtkmm.h>
 #include <iostream>
 
+// const 
+const static std::string APP_TITLE{"CSE3310 Poker++"};
+const static std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
+const static std::string VERSION{"0.1"};
 
 
 // used a a macro to link the card buttons functions that the player can discard

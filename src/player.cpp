@@ -13,42 +13,42 @@ Player::Player()
 
 Player::~Player() { }
 
-on_play_click()
+void Player::on_play_click()
 {
 
 }
 
-on_quit_click()
+void Player::on_quit_click()
 {
 
 }
 
-on_check_click()
+void Player::on_check_click()
 {
 
 }
 
-on_bet_click()
+void Player::on_bet_click()
 {
 
 }
 
-on_call_click()
+void Player::on_call_click()
 {
 
 }
 
-on_raise_click()
+void Player::on_raise_click()
 {
 
 }
 
-on_fold_click()
+void Player::on_fold_click()
 {
 
 }
 
-on_exchange_click()
+void Player::on_exchange_click()
 {
 
 }
