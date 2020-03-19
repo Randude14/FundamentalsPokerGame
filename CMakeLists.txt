@@ -1,5 +1,15 @@
+
 #Specify the version being used as well as the language
 cmake_minimum_required(VERSION 2.6)
+
+
+# globals
+# Name of the files that contain the main for the player and dealer
+set(CLIENT_MAIN "src/main.cpp")
+set(SERVER_MAIN "src/dealer.cpp")
+
+# end globals
+
 
 #Name of the project
 project(Poker++)
@@ -32,15 +42,16 @@ else()
   message(FATAL_ERROR "gtkmm-3.0 not found. It is required. exiting.")
 endif()
 
-#This tells cmake to create the executable based on those sources
-add_executable(poker_client "src/main.cpp")
-
-# Add later when we decide the name of the server source file
-add_executable(poker_server "src/dealer.cpp")
-
 # Add all source files
 file(GLOB SOURCES "src/*.cpp")
 add_library(LIB ${SOURCES}) 
+
+
+#This tells cmake to create the executable based on those sources
+add_executable(poker_client ${CLIENT_MAIN})
+
+# Add later when we decide the name of the server source file
+add_executable(poker_server ${SERVER_MAIN})
 
 # link executables to our source files
 target_link_libraries (poker_client ${LIB})
