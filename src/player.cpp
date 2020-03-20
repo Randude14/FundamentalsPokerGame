@@ -23,6 +23,11 @@ void Player::on_quit_click()
 
 }
 
+void Player::on_bet_value_changed()
+{
+
+}
+
 void Player::on_check_click()
 {
 
@@ -48,7 +53,7 @@ void Player::on_fold_click()
 
 }
 
-void Player::on_exchange_click()
+void Player::on_discard_click()
 {
 
 }
