@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
-  <object class="GtkAdjustment" id="bet_slider">
+  <object class="GtkAdjustment" id="bet_slider_adj">
     <property name="upper">500</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
@@ -629,11 +629,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScale">
+                  <object class="GtkScale" id="bet_slider">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
-                    <property name="adjustment">bet_slider</property>
+                    <property name="adjustment">bet_slider_adj</property>
                     <property name="fill_level">500</property>
                     <property name="round_digits">0</property>
                   </object>
