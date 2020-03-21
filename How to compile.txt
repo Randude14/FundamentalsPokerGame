@@ -1,0 +1,14 @@
+# Essentially create a build directory and cmake/make in that
+rm -r build
+mkdir build
+cd build
+cmake ..
+make
+
+# To run client
+cd build
+./poker_client
+
+# To run server
+cd build
+./poker_server
