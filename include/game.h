@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 
+/*
+ * Macros for application metadata
+ */
 const std::string APP_TITLE{"CSE3310 Poker++"};
 const std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
 const std::string VERSION{"0.1"};
@@ -19,15 +22,18 @@ class Game
   public:
     Game(std::string name);
     virtual ~Game();
-    void player_join(Player player);
-    void check();
-    void bet(double amount);
-    void call(double amount);
-    void raise(double amount);
-    void fold();
-    void next_stage();
+    void player_join(Player player);    // Called when each player joins the game
+    void check();                       // Called when a player chooses to check (no bet)
+    void bet(double amount);            // Called when a player chooses to bet
+    void call(double amount);           // Called when a player chooses to call (match bet)
+    void raise(double amount);          // Called when a player chooses to raise (increase bet)
+    void fold();                        // Called when a player chooses to fold (forfeit)
+    void next_stage();                  // Called to move from (0) Deal ->
+                                        //                     (1) Betting round 1 ->
+                                        //                     (2) Exchange cards ->
+                                        //                     (3) Betting round 2 ->
+                                        //                     (4) End
   private:
-//    Dealer dealer;
     std::vector< Card * > deck;
     std::vector< Card * > discard_pile;
     double prize_pot;

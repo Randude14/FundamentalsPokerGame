@@ -21,7 +21,7 @@ class Player
     // Callbacks for the UI widgets for the player
 	
 	                                    // "widget name"            "widget action"
-    void on_play_click();               // Player->player_button    (play a new game)
+    void on_play_click();               // Player->play_button      (play a new game)
     void on_quit_click();               // Player->quit_button      (quit the game)
     void on_bet_value_changed();        // Player->bet_value_slider (player is adjusting bet)
     void on_check_click();              // Player->check_button     (no bet)
@@ -41,7 +41,7 @@ class Player
     double bet_amount;
     bool has_bet;
 	
-	// Referrences for the UI widgets
+	// References for the UI widgets
     Gtk::ToolButton play_button;
     Gtk::ToolButton quit_button;
     Gtk::Range *bet_value_slider;
