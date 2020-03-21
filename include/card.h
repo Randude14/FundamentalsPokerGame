@@ -3,6 +3,12 @@
 
 #include <string>
 
+/* 
+ * Acts as the cards the game will deal out and handle
+ */
+
+// The card values assigned
+// Values may need to be changed later to reflect their actual game values...
 enum class Card_value
 {
   ACE,
@@ -20,6 +26,7 @@ enum class Card_value
   KING,
 };
 
+// Suit values assigned
 enum class Suit
 {
   HEART,
@@ -29,7 +36,7 @@ enum class Suit
 };
 
 /*
- * Card class to contain face value and suit
+ * Each card contains a suit and card value
  */
 
 class Card
