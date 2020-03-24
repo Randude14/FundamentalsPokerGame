@@ -7,13 +7,6 @@
 #include <vector>
 
 /*
- * Macros for application metadata
- */
-const std::string APP_TITLE{"CSE3310 Poker++"};
-const std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
-const std::string VERSION{"0.1"};
-
-/*
  * Game class to maintain game state
  */
 

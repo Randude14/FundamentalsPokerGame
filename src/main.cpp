@@ -1,10 +1,4 @@
-#include <gtkmm.h>
-#include <iostream>
-
-// const 
-const static std::string APP_TITLE{"CSE3310 Poker++"};
-const static std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
-const static std::string VERSION{"0.1"};
+#include "player.h"
 
 /*
 	Acts as the driver for the player class. Currently loads the UI and has nothing to do with the player class
@@ -20,14 +14,16 @@ extern "C" void on_click_##NUM(void* widget, gpointer user_data)\
 }
 
 // function definitions...
-CARD_CLICK(1)
-CARD_CLICK(2)
-CARD_CLICK(3)
-CARD_CLICK(4)
-CARD_CLICK(5)
+//CARD_CLICK(1)
+//CARD_CLICK(2)
+//CARD_CLICK(3)
+//CARD_CLICK(4)
+//CARD_CLICK(5)
 
 
 int main (int argc, char *argv[]) {
+	
+	/*
     auto app = Gtk::Application::create(argc, argv, APP_NAME);
 	
 	// create window object pointer
@@ -57,6 +53,15 @@ int main (int argc, char *argv[]) {
 	win->set_title(APP_TITLE);
 	
 	// run the window and return the exit status
-    return app->run(*win);
+    return app->run(*win);*/
+	
+	
+	Player *p = new Player();
+	
+	p->run(argc, argv);
+	
+	delete p;
+	
+	return 0;
 }
 

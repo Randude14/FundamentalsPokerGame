@@ -10,12 +10,27 @@
  * Player class which acts as client and is driven by user input
  * main.cpp acts as the driver for this class
  */
+ 
+ /*
+ * Macros for application metadata
+ */
+const std::string APP_TITLE{"CSE3310 Poker++"};
+const std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
+const std::string VERSION{"0.1"};
+ 
+ // number of cards each player gets
+#define NUM_CARDS 5
 
 class Player
 {
   public:
     Player();             // Set player defaults
     virtual ~Player();
+	
+	// run the player client given the arguments
+	// returns the exit status of the client window
+	int run(int argc, char* argv[]);
+	
   protected:
   
     // Callbacks for the UI widgets for the player
@@ -30,6 +45,7 @@ class Player
     void on_raise_click();              // Player->raise_button     (increase current bet)
     void on_fold_click();               // Player->fold_button      (drop out of hand)
     void on_discard_click();            // Player->discard_button   (exchange 0-3 Cards)
+	
 	// End callbacks
 	
   private:
@@ -51,6 +67,8 @@ class Player
     Gtk::ToolButton *raise_button;
     Gtk::ToolButton *fold_button;
     Gtk::ToolButton *discard_button;
+	
+	Gtk::Image *card_images[NUM_CARDS]; // images for the player cards
 	// End referrences
 	
     void reset_sensitivity();           // Reset button sensitivity based on game state
