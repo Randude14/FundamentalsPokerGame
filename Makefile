@@ -21,7 +21,7 @@ CC = g++
 
 .PHONY: all $(SERVER) $(PLAYER)
 
-all: $(SERVER) $(PLAYER) $()
+all: $(SERVER) $(PLAYER)
 
 $(SERVER): $(SERVER_OBJECT) $(OBJECTS)
 	$(CC) $^ -o $@ $(GTKFLAGS) 
@@ -33,4 +33,4 @@ $(PLAYER): $(PLAYER_OBJECT) $(OBJECTS)
 	$(CC) $(CFLAGS) $(GTKFLAGS) $< -o $@
 	
 clean :
-	rm -r *.o $(PLAYER) $(SERVER)
+	rm -r src/*.o $(PLAYER) $(SERVER)
