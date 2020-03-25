@@ -19,6 +19,7 @@ Player::~Player() { }
 
 
 // Called by main
+// TODO: using the args, connect to dealer
 int Player::run(int argc, char* argv[])
 {
   auto app = Gtk::Application::create(argc, argv, APP_NAME);
