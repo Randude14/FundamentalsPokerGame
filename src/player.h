@@ -46,6 +46,12 @@ class Player
     void on_fold_click();               // Player->fold_button      (drop out of hand)
     void on_discard_click();            // Player->discard_button   (exchange 0-3 Cards)
 	
+	void on_hand_click_1();             // Player->card_images      (buttons that hold the player cards)
+	void on_hand_click_2();
+	void on_hand_click_3();
+	void on_hand_click_4();
+	void on_hand_click_5();
+	
 	// End callbacks
 	
   private:
@@ -58,18 +64,19 @@ class Player
     bool has_bet;
 	
 	// References for the UI widgets
-    Gtk::ToolButton play_button;
-    Gtk::ToolButton quit_button;
+    Gtk::Button *play_button;
+    Gtk::Button *quit_button;
     Gtk::Range *bet_value_slider;
-    Gtk::ToolButton *check_button;    
-    Gtk::ToolButton *bet_button;
-    Gtk::ToolButton *call_button;
-    Gtk::ToolButton *raise_button;
-    Gtk::ToolButton *fold_button;
-    Gtk::ToolButton *discard_button;
+    Gtk::Button *check_button;    
+    Gtk::Button *bet_button;
+    Gtk::Button *call_button;
+    Gtk::Button *fold_button;
+    Gtk::Button *discard_button;
 	
-	Gtk::Image *card_images[NUM_CARDS]; // images for the player cards
+	Gtk::Image  *card_images[NUM_CARDS];  // images for the player cards
+	Gtk::Button *card_buttons[NUM_CARDS]; // buttons for the player cards
 	// End referrences
+	
 	
     void reset_sensitivity();           // Reset button sensitivity based on game state
 

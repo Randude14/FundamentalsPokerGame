@@ -523,7 +523,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card1</property>
-                    <signal name="clicked" handler="on_click_1" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -537,7 +536,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card2</property>
-                    <signal name="clicked" handler="on_click_2" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -551,7 +549,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card3</property>
-                    <signal name="clicked" handler="on_click_3" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -565,7 +562,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card4</property>
-                    <signal name="clicked" handler="on_click_4" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -579,7 +575,6 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">card5</property>
-                    <signal name="clicked" handler="on_click_5" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -591,7 +586,6 @@
                   <object class="GtkButton" id="discard">
                     <property name="label" translatable="yes">Discard</property>
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>
@@ -614,11 +608,10 @@
                 <property name="can_focus">False</property>
                 <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkButton" id="raise">
-                    <property name="label" translatable="yes">Raise
+                  <object class="GtkButton" id="bet_raise">
+                    <property name="label" translatable="yes">Bet
 </property>
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>
@@ -631,7 +624,6 @@
                 <child>
                   <object class="GtkScale" id="bet_slider">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="adjustment">bet_slider_adj</property>
                     <property name="fill_level">500</property>
@@ -659,7 +651,6 @@
                     <property name="label" translatable="yes">Fold
 </property>
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>
@@ -674,7 +665,6 @@
                     <property name="label" translatable="yes">Check
 </property>
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>
@@ -689,7 +679,6 @@
                     <property name="label" translatable="yes">Call
 </property>
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>
