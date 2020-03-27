@@ -1,6 +1,9 @@
 /build
+/asio-1.12.2
 compile.bash
 poker_client
 poker_server
+chat_client
+chat_server
 
 /src/*.o
