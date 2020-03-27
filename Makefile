@@ -12,7 +12,7 @@ CHAT_SERVER=chat_server
 # NOTE: these source files should NOT have a main or make will fail on compile
 SOURCES = src/card.cpp src/game.cpp src/player.cpp
 OBJECTS = $(SOURCES:.cpp=.o) 
-
+HEADERS = -I./include/ -I./asio-1.12.2/include
 
 # define main files and their object files
 CLIENT_MAIN = src/poker_client.cpp
@@ -43,8 +43,8 @@ asio-1.12.2:
 $(SERVER): $(SERVER_OBJECT) $(OBJECTS)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
 
-$(CLIENT): $(CLIENT_OBJECT) $(OBJECTS) 
-	$(CC) $^ -o $@ $(GTKFLAGS)
+$(CLIENT): $(CLIENT_OBJECT) $(OBJECTS)
+	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
 	
 $(CHAT_CLIENT): $(CHAT_CLIENT_OBEJCT)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
@@ -53,12 +53,13 @@ $(CHAT_SERVER): $(CHAT_SERVER_OBEJCT)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
 
 # build objects from source files
-.cpp.o:
-	$(CC) $(CFLAGS) $(GTKFLAGS) $(THREADFLAGS) $< -o $@
+.cpp.o: $(HEADERS)
+	$(CC) $(HEADERS) $(CFLAGS) $(GTKFLAGS) $(THREADFLAGS) $< -o $@
 
 # remove executables and asio lib
 clean :
 	-rm -rf asio-1.12.2
+	-rm src/*.o
 	-rm $(CLIENT)
 	-rm $(SERVER)
 	-rm $(CHAT_CLIENT)

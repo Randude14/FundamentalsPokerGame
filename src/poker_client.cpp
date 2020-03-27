@@ -62,8 +62,13 @@ int poker_client::run(int argc, char* argv[])
   // set title....gtk apparently changes the title. No biggie
   win->set_title(APP_TITLE);  
   
+  player = new Player();
+  
+  opp_displays = (opponent_display*) malloc(sizeof(opponent_display) * MAX_OPPONENTS);
+  opponents = (Player*) malloc(sizeof(Player) * MAX_OPPONENTS);
+  
   // Hook in widgets
-  // macro finds widget with ID and sets to VAR while connecting the button with FUNC
+  // macro finds widget with ID and sets to VAR while connecting its callback to FUNC
   #define GET_AND_CONNECT(ID, VAR, FUNC)  \
     refBuilder->get_widget(ID, VAR);      \
 	VAR->signal_clicked().connect(sigc::mem_fun(*this, FUNC));
@@ -78,7 +83,7 @@ int poker_client::run(int argc, char* argv[])
   // get range and connect the value changed method
   refBuilder->get_widget("bet_slider", bet_value_slider);
   bet_value_slider->signal_value_changed().connect( sigc::mem_fun(*this, &poker_client::on_bet_value_changed) );
-  bet_value_slider->set_range(0, player.wallet); // set range based on initial player wallet
+  bet_value_slider->set_range(0, player->wallet); // set range based on initial player wallet
   
   // connect hand buttons
   GET_AND_CONNECT( "hand1", card_buttons[0], &poker_client::on_hand_click_1 )
@@ -87,17 +92,62 @@ int poker_client::run(int argc, char* argv[])
   GET_AND_CONNECT( "hand4", card_buttons[3], &poker_client::on_hand_click_4 )
   GET_AND_CONNECT( "hand5", card_buttons[4], &poker_client::on_hand_click_5 )
   
+  // find card images
+  for(int i = 0; i < NUM_CARDS; i++)
+    refBuilder->get_widget(std::string("card") + std::to_string(i+1), cards[i]);
+  
+  // grab labels
+  refBuilder->get_widget("username", username);
+  refBuilder->get_widget("turn_status", turn_status);
+  refBuilder->get_widget("pot_label", pot_label);
+  refBuilder->get_widget("current_bet_label", current_bet_label);
+  
+  
+  
+  
+  for(int i = 1; i <= MAX_OPPONENTS; i++)
+  {
+	std::string player = std::string("p") + std::to_string(i) + std::string("_");
+	
+    refBuilder->get_widget(player + std::string("name"), opp_displays[i-1].username);
+	
+    for(int j = 1; j <= NUM_CARDS; j++)
+    {
+      refBuilder->get_widget(player + std::string("card") + std::to_string(j), opp_displays[i-1].cards[j-1]);
+	  opp_displays[i-1].cards[j-1]->set("cards/5D.png");
+    }
+	  
+	refBuilder->get_widget(player + std::string("last_action"), opp_displays[i-1].last_action);
+  }
   
   // TODO: disable poker_client control buttons
   
-  // Run the window and return the exit status
-  return app->run(*win);
+  // Run the window
+  int ret = app->run(*win);
+  
+  for(int i = 0; i < MAX_OPPONENTS; i++, opp_displays++)
+  {
+      opp_displays[i].username = NULL;
+      opp_displays[i].last_action = NULL;  
+	  
+      for(int j = 0; j < NUM_CARDS; j++)
+        opp_displays[i].cards[j] = NULL;
+  }
+  
+  opp_displays = 0;
+  // free memory
+  delete player;
+  free(opp_displays);
+  free(opponents);
+
+  // return exit status
+  return ret;
 }
 
 // Use macros to shorten the need for multiple methods 
 // that do the same thing, minus the number....
 #define HAND_CLICK_METHODS(NUM)                                   \
-void  poker_client::on_hand_click_##NUM()                       \
+void  poker_client::on_hand_click_##NUM()                         \
 {                                                                 \
   std::cout << "Hand " << NUM << " was clicked!" << std::endl;    \
 }              

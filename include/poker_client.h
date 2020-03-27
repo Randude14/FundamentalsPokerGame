@@ -19,13 +19,21 @@ const std::string APP_TITLE{"CSE3310 Poker++"};
 const std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
 const std::string VERSION{"0.1"};
 
-#define MAX_OPPPONENTS 4
+// max players that the client will play against
+#define MAX_OPPONENTS 4
 
 class poker_client
 {
   public:
     poker_client();             // Set player defaults
     virtual ~poker_client();
+	
+  struct opponent_display
+  {
+    Gtk::Label *username;
+    Gtk::Label *last_action;
+    Gtk::Image *cards[NUM_CARDS];
+  };
 	
 	// run the player client given the arguments
 	// returns the exit status of the client window
@@ -34,10 +42,14 @@ class poker_client
   protected:
   
     // player that this gui is taking input from
-    Player player;
+    Player *player;
 	
-	// vector for the other players in the game
-	Player opponents[MAX_OPPPONENTS]; 
+	// array for the other players in the game
+	Player *opponents; 
+	
+	// vector for the widgets of the other players
+	// will get updated from time to time
+	opponent_display *opp_displays;
   
     // Callbacks for the UI widgets for the player
 	
@@ -60,6 +72,8 @@ class poker_client
 	
 	// End callbacks
 	
+	const std::string facedown = "cards/card_down.png";
+	
   private:
 	
 	// References for the UI widgets
@@ -71,8 +85,19 @@ class poker_client
     Gtk::Button *call_button;
     Gtk::Button *fold_button;
     Gtk::Button *discard_button;
+	Gtk::Label *username;
+	Gtk::Label *turn_status;
+	
+	// formats for the pot and current_labels
+	std::string pot_label_format = "Pot: %.0f";
+	std::string current_bet_label_format = "Current Bet: %.0f";
+	
+	// pot and current_bet labels
+	Gtk::Label *pot_label;
+	Gtk::Label *current_bet_label;
 	
 	Gtk::Button *card_buttons[NUM_CARDS]; // buttons for the player cards
+	Gtk::Image *cards[NUM_CARDS];         // images for the player cards
 	// End referrences
 	
 	
