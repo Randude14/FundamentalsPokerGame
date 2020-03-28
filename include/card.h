@@ -48,11 +48,8 @@ enum class Suit
 class Card
 {
   public:
-    Card(Card_value value, Suit suit);
+    Card(Card_value value=Card_value::ACE, Suit suit=Suit::HEART);
     virtual ~Card();
-	Card_value get_value() const;
-	Suit get_suit() const;
-  private:
     Card_value value;                   // A = 1, J = 11, Q = 12, K = 13
     Suit suit;
 };

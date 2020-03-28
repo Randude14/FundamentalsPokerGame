@@ -170,8 +170,8 @@ void  poker_client::on_hand_click_##NUM()                       \
   if(cards[NUM-1]->property_file() == card_down_file)           \
   {                                                             \
     Card card = player->hand[NUM-1];                            \
-	int suit = (int)card.get_suit();                            \
-	int value = (int)card.get_value();                          \
+	int suit = (int)card.suit;                            \
+	int value = (int)card.value;                          \
     std::string image = "cards/";                               \
     image.push_back( VALUES[value] );	                        \
     image.push_back( SUITS[suit] );	                            \
