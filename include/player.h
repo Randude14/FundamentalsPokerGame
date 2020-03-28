@@ -23,7 +23,7 @@ class Player
     int table_position;
     std::string name;
     double wallet;
-    std::vector< Card * > hand;
+    Card hand[NUM_CARDS];
     double bet_amount;
     bool has_bet;
 };

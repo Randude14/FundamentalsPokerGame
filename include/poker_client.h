@@ -50,6 +50,11 @@ class poker_client
 	// vector for the widgets of the other players
 	// will get updated from time to time
 	opponent_display *opp_displays;
+	
+	const std::string card_directory = "cards/";
+	const std::string card_down_file = card_directory + "card_down.png";
+    const std::string SUITS = "HSDC";
+    const std::string VALUES = " A23456789TJQK"; // use space as offset
   
     // Callbacks for the UI widgets for the player
 	

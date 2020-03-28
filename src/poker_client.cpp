@@ -3,6 +3,7 @@
 
 #include "poker_client.h"
 #include "player.h"
+#include "card.h"
 #include "json.hpp"
 
 // **************************** MAIN *****************************
@@ -42,12 +43,12 @@ int poker_client::run(int argc, char* argv[])
   // create window object pointer
   Gtk::Window* win;
   
-  //Load the GtkBuilder file and instantiate its widgets:
+  // Create the builder
   auto refBuilder = Gtk::Builder::create();
   
   try
   {
-  	// load glade file
+  	// load glade file using the builder
   	refBuilder->add_from_file("interface.glade");
   }
   catch(const std::exception& ex)
@@ -59,7 +60,7 @@ int poker_client::run(int argc, char* argv[])
   // get the window object from the referrence builder
   refBuilder->get_widget("Poker++", win);
   
-  // set title....gtk apparently changes the title. No biggie
+  // set title....the builder apparently changes the title from the glade file. No biggie
   win->set_title(APP_TITLE);  
   
   player = new Player();
@@ -94,7 +95,22 @@ int poker_client::run(int argc, char* argv[])
   
   // find card images
   for(int i = 0; i < NUM_CARDS; i++)
+  {
     refBuilder->get_widget(std::string("card") + std::to_string(i+1), cards[i]);
+	cards[i]->set(card_down_file);
+  }
+  
+  // set default values for player's hand....these will be removed later
+  Card c1{Card_value::TEN, Suit::CLUB};
+  Card c2{Card_value::JACK, Suit::CLUB};
+  Card c3{Card_value::QUEEN, Suit::CLUB};
+  Card c4{Card_value::KING, Suit::CLUB};
+  Card c5{Card_value::ACE, Suit::CLUB};
+  player->hand[0] = c1;
+  player->hand[1] = c2;
+  player->hand[2] = c3;
+  player->hand[3] = c4;
+  player->hand[4] = c5;
   
   // grab labels
   refBuilder->get_widget("username", username);
@@ -114,7 +130,7 @@ int poker_client::run(int argc, char* argv[])
     for(int j = 1; j <= NUM_CARDS; j++)
     {
       refBuilder->get_widget(player + std::string("card") + std::to_string(j), opp_displays[i-1].cards[j-1]);
-	  opp_displays[i-1].cards[j-1]->set("cards/5D.png");
+	  opp_displays[i-1].cards[j-1]->set(card_down_file);
     }
 	  
 	refBuilder->get_widget(player + std::string("last_action"), opp_displays[i-1].last_action);
@@ -125,7 +141,7 @@ int poker_client::run(int argc, char* argv[])
   // Run the window
   int ret = app->run(*win);
   
-  for(int i = 0; i < MAX_OPPONENTS; i++, opp_displays++)
+  for(int i = 0; i < MAX_OPPONENTS; i++)
   {
       opp_displays[i].username = NULL;
       opp_displays[i].last_action = NULL;  
@@ -134,7 +150,6 @@ int poker_client::run(int argc, char* argv[])
         opp_displays[i].cards[j] = NULL;
   }
   
-  opp_displays = 0;
   // free memory
   delete player;
   free(opp_displays);
@@ -144,12 +159,29 @@ int poker_client::run(int argc, char* argv[])
   return ret;
 }
 
+// Allows
+
 // Use macros to shorten the need for multiple methods 
 // that do the same thing, minus the number....
-#define HAND_CLICK_METHODS(NUM)                                   \
-void  poker_client::on_hand_click_##NUM()                         \
-{                                                                 \
-  std::cout << "Hand " << NUM << " was clicked!" << std::endl;    \
+#define HAND_CLICK_METHODS(NUM)                                 \
+void  poker_client::on_hand_click_##NUM()                       \
+{                                                               \
+  std::cout << "Hand " << NUM << " was clicked!" << std::endl;  \
+  if(cards[NUM-1]->property_file() == card_down_file)           \
+  {                                                             \
+    Card card = player->hand[NUM-1];                            \
+	int suit = (int)card.get_suit();                            \
+	int value = (int)card.get_value();                          \
+    std::string image = "cards/";                               \
+    image.push_back( VALUES[value] );	                        \
+    image.push_back( SUITS[suit] );	                            \
+	image += ".png";                                            \
+	cards[NUM-1]->set(image);                                   \
+  }                                                             \
+  else                                                          \
+  {                                                             \
+    cards[NUM-1]->set(card_down_file);                          \
+  }                                                             \
 }              
 
 /*

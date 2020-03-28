@@ -135,7 +135,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="last_action_1">
+                  <object class="GtkLabel" id="p1_last_action">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">last action</property>
@@ -241,7 +241,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="last_action_2">
+                  <object class="GtkLabel" id="p2_last_action">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">last action</property>
@@ -347,7 +347,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="last_action_3">
+                  <object class="GtkLabel" id="p3_last_action">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">last action</property>
@@ -453,7 +453,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="last_action_4">
+                  <object class="GtkLabel" id="p4_last_action">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">last action</property>
