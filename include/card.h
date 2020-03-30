@@ -39,18 +39,12 @@ enum class Suit
  * Each card contains a suit and card value
  */
 
-// definitions used to identify cards by characters
-#define HEART_ 'H'
-#define SPADE_ 'S'
-#define DIAMOND_ 'D'
-#define CLUB_ 'C'
-
 class Card
 {
   public:
     Card(Card_value value=Card_value::ACE, Suit suit=Suit::HEART);
     virtual ~Card();
-    Card_value value;                   // A = 1, J = 11, Q = 12, K = 13
+    Card_value value;
     Suit suit;
 };
 

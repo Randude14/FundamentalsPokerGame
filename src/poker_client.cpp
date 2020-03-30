@@ -9,16 +9,16 @@
 // **************************** MAIN *****************************
 int main(int argc, char* argv[])
 {
-	std::cout << "Starting the " << APP_TITLE << " client for version " << VERSION << "...." << std::endl;
-	
-	// client object and run
-	poker_client *client = new poker_client();
-	int status = client->run(argc, argv);
-	
-	// free memory and return the exit status of the client
-	std::cout << "Client has been closed." << std::endl;
-	delete client;
-	return status;
+  std::cout << "Starting the " << APP_TITLE << " client for version " << VERSION << "...." << std::endl;
+  
+  // client object and run
+  poker_client *client = new poker_client();
+  int status = client->run(argc, argv);
+  
+  // free memory and return the exit status of the client
+  std::cout << "Client has been closed." << std::endl;
+  delete client;
+  return status;
 }
 
 
@@ -48,8 +48,8 @@ int poker_client::run(int argc, char* argv[])
   
   try
   {
-  	// load glade file using the builder
-  	refBuilder->add_from_file("interface.glade");
+    // load glade file using the builder
+    refBuilder->add_from_file("interface.glade");
   }
   catch(const std::exception& ex)
   {
@@ -65,15 +65,12 @@ int poker_client::run(int argc, char* argv[])
   
   player = new Player();
   
-  opp_displays = (opponent_display*) malloc(sizeof(opponent_display) * MAX_OPPONENTS);
-  opponents = (Player*) malloc(sizeof(Player) * MAX_OPPONENTS);
-  
   // Hook in widgets
   // macro finds widget with ID and sets to VAR while connecting its callback to FUNC
   #define GET_AND_CONNECT(ID, VAR, FUNC)  \
     refBuilder->get_widget(ID, VAR);      \
-	VAR->signal_clicked().connect(sigc::mem_fun(*this, FUNC));
-	
+    VAR->signal_clicked().connect(sigc::mem_fun(*this, FUNC));
+    
   // connect poker_client control buttons
   GET_AND_CONNECT( "check",     check_button,   &poker_client::on_check_click )
   GET_AND_CONNECT( "bet_raise", bet_button,     &poker_client::on_bet_click )
@@ -97,7 +94,8 @@ int poker_client::run(int argc, char* argv[])
   for(int i = 0; i < NUM_CARDS; i++)
   {
     refBuilder->get_widget(std::string("card") + std::to_string(i+1), cards[i]);
-	cards[i]->set(card_down_file);
+    cards[i]->set(card_down_file);
+    card_buttons[i]->set_sensitive(false);
   }
   
   // set default values for player's hand....these will be removed later
@@ -121,45 +119,72 @@ int poker_client::run(int argc, char* argv[])
   
   
   
-  for(int i = 1; i <= MAX_OPPONENTS; i++)
+  for(int i = 0; i < MAX_OPPONENTS; i++)
   {
-	std::string player = std::string("p") + std::to_string(i) + std::string("_");
-	
-    refBuilder->get_widget(player + std::string("name"), opp_displays[i-1].username);
-	
+    std::cout << i << std::endl;
+    opponents[i].name = std::string("Player ") + std::to_string(i+2);
+    std::string player = std::string("p") + std::to_string(i+1) + std::string("_");
+    
+    refBuilder->get_widget(player + std::string("name"), opp_displays[i].username);
+    
     for(int j = 1; j <= NUM_CARDS; j++)
     {
-      refBuilder->get_widget(player + std::string("card") + std::to_string(j), opp_displays[i-1].cards[j-1]);
-	  opp_displays[i-1].cards[j-1]->set(card_down_file);
+      refBuilder->get_widget(player + std::string("card") + std::to_string(j), opp_displays[i].cards[j-1]);
+      opp_displays[i].cards[j-1]->set(card_down_file);
     }
-	  
-	refBuilder->get_widget(player + std::string("last_action"), opp_displays[i-1].last_action);
+      
+    refBuilder->get_widget(player + std::string("last_action"), opp_displays[i].last_action);
   }
   
   // TODO: disable poker_client control buttons
+  update_client();
   
   // Run the window
   int ret = app->run(*win);
   
-  for(int i = 0; i < MAX_OPPONENTS; i++)
-  {
-      opp_displays[i].username = NULL;
-      opp_displays[i].last_action = NULL;  
-	  
-      for(int j = 0; j < NUM_CARDS; j++)
-        opp_displays[i].cards[j] = NULL;
-  }
-  
   // free memory
   delete player;
-  free(opp_displays);
-  free(opponents);
 
   // return exit status
   return ret;
 }
 
-// Allows
+
+std::string poker_client::get_card_file(Card card)
+{
+  std::string image_file = card_directory;
+  image_file.push_back( VALUES[static_cast<int>(card.value)] );
+  image_file.push_back( SUITS[static_cast<int>(card.suit)] );
+  image_file += ".png";   
+  
+  return image_file;
+}
+
+void poker_client::update_client(bool showcards)
+{
+  username->set_label(player->name); // update username
+  for(int i = 0; i < NUM_CARDS; i++) // update cards
+  {
+    std::string image_file = get_card_file(player->hand[i]);
+    cards[i]->set(image_file);
+    card_buttons[i]->set_sensitive(true);
+  }
+  
+  for(int i = 0; i < MAX_OPPONENTS; i++) // update opponents info
+  {
+    auto od = opp_displays[i];
+    auto opp = opponents[i];
+    od.username->set_label(opp.name);
+    for(int i = 0; i < NUM_CARDS; i++) // update cards
+    {
+      std::string image_file = (showcards) ? get_card_file(opp.hand[i]) : card_down_file;
+      cards[i]->set(image_file);
+    }
+  }
+}
+
+
+// Allows players to flip over cards. This tells the client they want to discard those files
 
 // Use macros to shorten the need for multiple methods 
 // that do the same thing, minus the number....
@@ -170,13 +195,13 @@ void  poker_client::on_hand_click_##NUM()                       \
   if(cards[NUM-1]->property_file() == card_down_file)           \
   {                                                             \
     Card card = player->hand[NUM-1];                            \
-	int suit = (int)card.suit;                            \
-	int value = (int)card.value;                          \
+    int suit = (int)card.suit;                                  \
+    int value = (int)card.value;                                \
     std::string image = "cards/";                               \
-    image.push_back( VALUES[value] );	                        \
-    image.push_back( SUITS[suit] );	                            \
-	image += ".png";                                            \
-	cards[NUM-1]->set(image);                                   \
+    image.push_back( VALUES[value] );                           \
+    image.push_back( SUITS[suit] );                             \
+    image += ".png";                                            \
+    cards[NUM-1]->set(image);                                   \
   }                                                             \
   else                                                          \
   {                                                             \

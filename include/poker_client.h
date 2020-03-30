@@ -45,11 +45,11 @@ class poker_client
     Player *player;
 	
 	// array for the other players in the game
-	Player *opponents; 
+	Player opponents[MAX_OPPONENTS]; 
 	
 	// vector for the widgets of the other players
 	// will get updated from time to time
-	opponent_display *opp_displays;
+	opponent_display opp_displays[MAX_OPPONENTS];
 	
 	const std::string card_directory = "cards/";
 	const std::string card_down_file = card_directory + "card_down.png";
@@ -105,8 +105,9 @@ class poker_client
 	Gtk::Image *cards[NUM_CARDS];         // images for the player cards
 	// End referrences
 	
-	
-    void reset_sensitivity();           // Reset button sensitivity based on game state
+	std::string get_card_file(Card card);      // get card image file from card
+	void update_client(bool showcards=false);  // called when new info is read in from server
+    void reset_sensitivity();                  // Reset button sensitivity based on game state
 
 };
 
