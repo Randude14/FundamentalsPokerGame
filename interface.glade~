@@ -32,6 +32,11 @@
     <property name="can_focus">False</property>
     <property name="pixbuf">cards/card_down.png</property>
   </object>
+  <object class="GtkImage" id="discard_icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">gui/discard.png</property>
+  </object>
   <object class="GtkWindow" id="Poker++">
     <property name="can_focus">False</property>
     <child>
@@ -570,6 +575,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Flip card 1</property>
                     <property name="image">card1</property>
                   </object>
                   <packing>
@@ -583,6 +589,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Flip card 2</property>
                     <property name="image">card2</property>
                   </object>
                   <packing>
@@ -596,6 +603,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Flip card 3</property>
                     <property name="image">card3</property>
                   </object>
                   <packing>
@@ -609,6 +617,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Flip card 4</property>
                     <property name="image">card4</property>
                   </object>
                   <packing>
@@ -622,6 +631,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Flip card 5</property>
                     <property name="image">card5</property>
                   </object>
                   <packing>
@@ -632,10 +642,11 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="discard">
-                    <property name="label" translatable="yes">Discard</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Discard the flipped cards</property>
+                    <property name="image">discard_icon</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -662,6 +673,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Bet a certain amount</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -701,6 +713,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Fold your hand</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -715,6 +728,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Check this round</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -729,6 +743,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Call a player's bet</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>

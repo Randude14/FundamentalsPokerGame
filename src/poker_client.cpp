@@ -38,7 +38,29 @@ poker_client::~poker_client() { }
 // TODO: using the args, connect to dealer
 int poker_client::run(int argc, char* argv[])
 {
+  
+  
   auto app = Gtk::Application::create(argc, argv, APP_NAME);
+  
+  
+  // READ THIS ****************
+  
+  /*
+   Window *play_quit_window = ....
+   
+   app->run(play_quit_window);
+   
+   if(user_clicked_quit)
+   {
+     return 0;
+   }
+   
+   
+   // if play was clicked, continue as is....
+   
+   
+   */
+  
   
   // create window object pointer
   Gtk::Window* win;
@@ -64,6 +86,7 @@ int poker_client::run(int argc, char* argv[])
   win->set_title(APP_TITLE);  
   
   player = new Player();
+  player->name = "Player 1";
   
   // Hook in widgets
   // macro finds widget with ID and sets to VAR while connecting its callback to FUNC
@@ -94,7 +117,6 @@ int poker_client::run(int argc, char* argv[])
   for(int i = 0; i < NUM_CARDS; i++)
   {
     refBuilder->get_widget(std::string("card") + std::to_string(i+1), cards[i]);
-    cards[i]->set(card_down_file);
     card_buttons[i]->set_sensitive(false);
   }
   
@@ -167,6 +189,7 @@ void poker_client::update_client(bool showcards)
   {
     std::string image_file = get_card_file(player->hand[i]);
     cards[i]->set(image_file);
+    std::cout << image_file << std::endl;
     card_buttons[i]->set_sensitive(true);
   }
   
@@ -178,7 +201,7 @@ void poker_client::update_client(bool showcards)
     for(int i = 0; i < NUM_CARDS; i++) // update cards
     {
       std::string image_file = (showcards) ? get_card_file(opp.hand[i]) : card_down_file;
-      cards[i]->set(image_file);
+      od.cards[i]->set(image_file);
     }
   }
 }
