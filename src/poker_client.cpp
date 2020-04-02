@@ -1,26 +1,48 @@
 #include <gtkmm.h>
 #include <iostream>
+#include <signal.h>
 
 #include "poker_client.h"
 #include "player.h"
 #include "card.h"
 #include "json.hpp"
 
+
+
+poker_client *client = NULL;
+
+// cntr-c handler
+void HandleControlC(int s)
+{
+  if(client != NULL)
+  {
+    client->close();
+    delete client;
+    client = NULL;
+    exit(1);
+  }
+}
+
+
 // **************************** MAIN *****************************
 int main(int argc, char* argv[])
 {
-  std::cout << "Starting the " << APP_TITLE << " client for version " << VERSION << "...." << std::endl;
+  
+  // catch a control-c force close
+  struct sigaction control_c_handler;
+
+  control_c_handler.sa_handler = HandleControlC;
+  sigemptyset(&control_c_handler.sa_mask);
+  control_c_handler.sa_flags = 0;
+
+  sigaction(SIGINT, &control_c_handler, NULL);
   
   // client object and run
-  poker_client *client = new poker_client();
+  client = new poker_client();
   int status = client->run(argc, argv);
-  
-  // free memory and return the exit status of the client
-  std::cout << "Client has been closed." << std::endl;
-  delete client;
+
   return status;
 }
-
 
 
 
@@ -62,6 +84,9 @@ int poker_client::run(int argc, char* argv[])
    */
   
   
+  
+  std::cout << "Starting the " << APP_TITLE << " client for version " << VERSION << "...." << std::endl;
+    
   // create window object pointer
   Gtk::Window* win;
   
@@ -85,7 +110,12 @@ int poker_client::run(int argc, char* argv[])
   // set title....the builder apparently changes the title from the glade file. No biggie
   win->set_title(APP_TITLE);  
   
-  player = new Player();
+  // create communicator
+  comm = new client_communicator();
+  
+  info = comm->get_info();
+  
+  Player* player = info->player;
   player->name = "Player 1";
   
   // Hook in widgets
@@ -143,8 +173,7 @@ int poker_client::run(int argc, char* argv[])
   
   for(int i = 0; i < MAX_OPPONENTS; i++)
   {
-    std::cout << i << std::endl;
-    opponents[i].name = std::string("Player ") + std::to_string(i+2);
+    ( info->opponents[i] )->name = std::string("Player ") + std::to_string(i+2);
     std::string player = std::string("p") + std::to_string(i+1) + std::string("_");
     
     refBuilder->get_widget(player + std::string("name"), opp_displays[i].username);
@@ -164,11 +193,21 @@ int poker_client::run(int argc, char* argv[])
   // Run the window
   int ret = app->run(*win);
   
-  // free memory
-  delete player;
+  this->close();
 
   // return exit status
   return ret;
+}
+
+void poker_client::close()
+{
+  comm->close();
+  
+  delete comm;
+  comm = NULL;
+  
+  // free memory and return the exit status of the client
+  std::cout << std::endl << "Client has been closed." << std::endl;
 }
 
 
@@ -184,23 +223,23 @@ std::string poker_client::get_card_file(Card card)
 
 void poker_client::update_client(bool showcards)
 {
-  username->set_label(player->name); // update username
+  username->set_label(info->player->name); // update username
+  
   for(int i = 0; i < NUM_CARDS; i++) // update cards
   {
-    std::string image_file = get_card_file(player->hand[i]);
+    std::string image_file = get_card_file(info->player->hand[i]);
     cards[i]->set(image_file);
-    std::cout << image_file << std::endl;
     card_buttons[i]->set_sensitive(true);
   }
   
   for(int i = 0; i < MAX_OPPONENTS; i++) // update opponents info
   {
     auto od = opp_displays[i];
-    auto opp = opponents[i];
-    od.username->set_label(opp.name);
+    auto opp = info->opponents[i];
+    od.username->set_label(opp->name);
     for(int i = 0; i < NUM_CARDS; i++) // update cards
     {
-      std::string image_file = (showcards) ? get_card_file(opp.hand[i]) : card_down_file;
+      std::string image_file = (showcards) ? get_card_file(opp->hand[i]) : card_down_file;
       od.cards[i]->set(image_file);
     }
   }
@@ -217,7 +256,7 @@ void  poker_client::on_hand_click_##NUM()                       \
   std::cout << "Hand " << NUM << " was clicked!" << std::endl;  \
   if(cards[NUM-1]->property_file() == card_down_file)           \
   {                                                             \
-    Card card = player->hand[NUM-1];                            \
+    Card card = info->player->hand[NUM-1];                      \
     int suit = (int)card.suit;                                  \
     int value = (int)card.value;                                \
     std::string image = "cards/";                               \

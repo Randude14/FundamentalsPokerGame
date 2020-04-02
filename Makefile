@@ -10,7 +10,7 @@ CHAT_SERVER = chat_server
 
 # define sources and their object files
 # NOTE: these source files should NOT have a main or make will fail on compile
-SOURCES = src/card.cpp src/game.cpp src/player.cpp
+SOURCES = src/card.cpp src/game.cpp src/player.cpp src/client_communicator.cpp
 OBJECTS = $(SOURCES:.cpp=.o) 
 HEADERS = -I./include/ -I./asio-1.12.2/include
 
@@ -27,7 +27,7 @@ CHAT_SERVER_OBJECT = $(CHAT_SERVER_MAIN:.cpp=.o)
 
 # define flags
 CC = g++
-CPPFLAGS = -c -g -std=c++11 -Wall
+CPPFLAGS += -c -g -std=c++11 -Wall
 CXXFLAGS += -Wall -O0 -g -std=c++11
 GTKFLAGS = `/usr/bin/pkg-config gtkmm-3.0 --cflags --libs`
 THREADFLAGS = -lpthread -pthread
@@ -58,8 +58,8 @@ $(CHAT_SERVER): $(CHAT_SERVER_OBJECT)
 # remove executables and asio lib
 clean :
 	-rm -rf asio-1.12.2
-	-rm $(CLIENT)
-	-rm $(SERVER)
-	-rm $(CHAT_CLIENT)
-	-rm $(CHAT_SERVER)
-	-rm src/*.o
+	-rm -f $(CLIENT)
+	-rm -f $(SERVER)
+	-rm -f $(CHAT_CLIENT)
+	-rm -f $(CHAT_SERVER)
+	-rm -f src/*.o
