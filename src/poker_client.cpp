@@ -40,6 +40,9 @@ int main(int argc, char* argv[])
   // client object and run
   client = new poker_client();
   int status = client->run(argc, argv);
+  
+  delete client;
+  client = NULL;
 
   return status;
 }
@@ -61,8 +64,14 @@ poker_client::~poker_client() { }
 int poker_client::run(int argc, char* argv[])
 {
   
+  if(argc < 3)
+  {
+    std::cout << argv[0] << " <host> <port>" << std::endl;
+    return 1;
+  }
   
-  auto app = Gtk::Application::create(argc, argv, APP_NAME);
+  
+  auto app = Gtk::Application::create(APP_NAME);
   
   
   // READ THIS ****************
@@ -104,25 +113,34 @@ int poker_client::run(int argc, char* argv[])
     return 1;
   }
   
+  // get the widget at ID for variable VAR
+  // if widget was not found, return 1 and alert system
+  #define GET_WIDGET(ID, VAR)             \
+    refBuilder->get_widget(ID, VAR);      \
+    if(VAR == nullptr) { std::cerr << "Failed to find widget for " << VAR << std::endl; return 1; }
+  
+  // Hook in widgets
+  // macro finds widget with ID and sets to VAR while connecting its callback to FUNC
+  #define GET_AND_CONNECT(ID, VAR, FUNC)  \
+    GET_WIDGET(ID, VAR)                          \
+    VAR->signal_clicked().connect(sigc::mem_fun(*this, FUNC));
+    
   // get the window object from the referrence builder
-  refBuilder->get_widget("Poker++", win);
+  GET_WIDGET("Poker++", win);
   
   // set title....the builder apparently changes the title from the glade file. No biggie
   win->set_title(APP_TITLE);  
   
   // create communicator
-  comm = new client_communicator();
+  comm = new client_communicator(this, argv);
+ 
+  comm->current_bet = 10;
+  comm->pot = 5;
   
-  info = comm->get_info();
-  
-  Player* player = info->player;
+  // get main player
+  Player* player = comm->players[comm->main_player];
   player->name = "Player 1";
-  
-  // Hook in widgets
-  // macro finds widget with ID and sets to VAR while connecting its callback to FUNC
-  #define GET_AND_CONNECT(ID, VAR, FUNC)  \
-    refBuilder->get_widget(ID, VAR);      \
-    VAR->signal_clicked().connect(sigc::mem_fun(*this, FUNC));
+  player->wallet = 100;
     
   // connect poker_client control buttons
   GET_AND_CONNECT( "check",     check_button,   &poker_client::on_check_click )
@@ -132,7 +150,7 @@ int poker_client::run(int argc, char* argv[])
   GET_AND_CONNECT( "discard",   discard_button, &poker_client::on_discard_click )
   
   // get range and connect the value changed method
-  refBuilder->get_widget("bet_slider", bet_value_slider);
+  GET_WIDGET("bet_slider", bet_value_slider)
   bet_value_slider->signal_value_changed().connect( sigc::mem_fun(*this, &poker_client::on_bet_value_changed) );
   bet_value_slider->set_range(0, player->wallet); // set range based on initial player wallet
   
@@ -146,7 +164,7 @@ int poker_client::run(int argc, char* argv[])
   // find card images
   for(int i = 0; i < NUM_CARDS; i++)
   {
-    refBuilder->get_widget(std::string("card") + std::to_string(i+1), cards[i]);
+    GET_WIDGET(std::string("card") + std::to_string(i+1), cards[i])
     card_buttons[i]->set_sensitive(false);
   }
   
@@ -163,28 +181,34 @@ int poker_client::run(int argc, char* argv[])
   player->hand[4] = c5;
   
   // grab labels
-  refBuilder->get_widget("username", username);
-  refBuilder->get_widget("turn_status", turn_status);
-  refBuilder->get_widget("pot_label", pot_label);
-  refBuilder->get_widget("current_bet_label", current_bet_label);
+  GET_WIDGET("username", username)
+  GET_WIDGET("turn_status", turn_status)
+  GET_WIDGET("pot_label", pot_label)
+  GET_WIDGET("current_bet_label", current_bet_label)
+  GET_WIDGET("wallet_label", wallet_label)
   
-  
-  
-  
+  // get opponent widgets
   for(int i = 0; i < MAX_OPPONENTS; i++)
   {
-    ( info->opponents[i] )->name = std::string("Player ") + std::to_string(i+2);
     std::string player = std::string("p") + std::to_string(i+1) + std::string("_");
+    opp_displays[i] = new opponent_display();
+    auto opp_display = opp_displays[i];
     
-    refBuilder->get_widget(player + std::string("name"), opp_displays[i].username);
+    // get username label
+    GET_WIDGET(player + std::string("name"), opp_display->username)
     
+    // get username label
+    GET_WIDGET(player + std::string("wallet"), opp_display->wallet)
+    
+    // get card images
     for(int j = 1; j <= NUM_CARDS; j++)
     {
-      refBuilder->get_widget(player + std::string("card") + std::to_string(j), opp_displays[i].cards[j-1]);
-      opp_displays[i].cards[j-1]->set(card_down_file);
+      GET_WIDGET(player + std::string("card") + std::to_string(j), opp_display->cards[j-1])
+      opp_display->cards[j-1]->set(card_down_file);
     }
       
-    refBuilder->get_widget(player + std::string("last_action"), opp_displays[i].last_action);
+    // get last action label
+    GET_WIDGET(player + std::string("last_action"), opp_display->last_action)
   }
   
   // TODO: disable poker_client control buttons
@@ -199,9 +223,14 @@ int poker_client::run(int argc, char* argv[])
   return ret;
 }
 
+
+// ***** CLOSE CLIENT **********
 void poker_client::close()
 {
   comm->close();
+  
+  for(int i = 0; i < MAX_OPPONENTS; i++)
+    delete opp_displays[i];
   
   delete comm;
   comm = NULL;
@@ -214,35 +243,102 @@ void poker_client::close()
 std::string poker_client::get_card_file(Card card)
 {
   std::string image_file = card_directory;
-  image_file.push_back( VALUES[static_cast<int>(card.value)] );
-  image_file.push_back( SUITS[static_cast<int>(card.suit)] );
+  image_file.push_back( values[ static_cast<int>(card.value) ] );
+  image_file.push_back( suits[ static_cast<int>(card.suit) ] );
   image_file += ".png";   
   
   return image_file;
 }
 
+
+// updatet the client GUI....eventually to be called by client_communicator
 void poker_client::update_client(bool showcards)
 {
-  username->set_label(info->player->name); // update username
+  int od_index = 0;
+  char buffer[50]; // used to format labels...
   
-  for(int i = 0; i < NUM_CARDS; i++) // update cards
+  for(int i = 0; i < MAX_PLAYERS; i++) // update opponents info
   {
-    std::string image_file = get_card_file(info->player->hand[i]);
-    cards[i]->set(image_file);
-    card_buttons[i]->set_sensitive(true);
-  }
-  
-  for(int i = 0; i < MAX_OPPONENTS; i++) // update opponents info
-  {
-    auto od = opp_displays[i];
-    auto opp = info->opponents[i];
-    od.username->set_label(opp->name);
-    for(int i = 0; i < NUM_CARDS; i++) // update cards
+    // update main player's info
+    if(i == comm->main_player)
     {
-      std::string image_file = (showcards) ? get_card_file(opp->hand[i]) : card_down_file;
-      od.cards[i]->set(image_file);
+      Player* player = comm->players[ comm->main_player ];
+      
+      username->set_label(player->name); // update username
+  
+      for(int i = 0; i < NUM_CARDS; i++) // update cards
+      {
+        std::string image_file = get_card_file(player->hand[i]);
+        cards[i]->set(image_file);
+        card_buttons[i]->set_sensitive(true);
+      } 
+    }
+    
+    // update opponent's info
+    else if(i < comm->num_players)
+    {
+      auto od = opp_displays[od_index++];
+      Player* opp = comm->players[i];
+
+      od->username->set_label(opp->name);
+      
+      
+      
+      for(int j = 0; j < NUM_CARDS; j++) // update cards
+      {
+        std::string image_file = (showcards) ? get_card_file(opp->hand[j]) : card_down_file;
+        od->cards[i]->set(image_file);
+      }   
+    }
+    
+    // this means we are beyond amount of players...fill in with blank info
+    else
+    {
+      auto od = opp_displays[od_index++];
+      
+      od->username->set_label(blank_name);
+      od->last_action->set_label("");
+      od->wallet->set_label("");
+      for(int j = 0; j < NUM_CARDS; j++) // update cards
+      {
+        od->cards[i]->set(card_down_file);
+      }  
     }
   }
+  
+  Player* main_player = comm->players[ comm->main_player ];
+  
+  // update wallet label
+  sprintf(buffer, wallet_label_format, main_player->wallet);
+  wallet_label->set_label(buffer);
+  
+  // update wallet label
+  sprintf(buffer, pot_label_format, comm->pot);
+  pot_label->set_label(buffer);
+  
+  // update wallet label
+  sprintf(buffer, current_bet_label_format, comm->current_bet);
+  current_bet_label->set_label(buffer);
+  
+  bet_value_slider->set_range(comm->current_bet, main_player->wallet);
+  
+  
+  // no sense in enabling call button if there is not bet yet
+  if(comm->current_bet == 0)
+  {
+    call_button->set_sensitive(false);
+  }
+  
+  // enable call button and update label to call, raising
+  // the bet slider forward indicates the player wants to raise
+  else
+  {
+    call_button->set_sensitive(true);
+    call_button->set_label(call_action);
+  }
+  
+  // enable check button based on the current bet
+  check_button->set_sensitive( comm->current_bet == 0 );
 }
 
 
@@ -256,13 +352,9 @@ void  poker_client::on_hand_click_##NUM()                       \
   std::cout << "Hand " << NUM << " was clicked!" << std::endl;  \
   if(cards[NUM-1]->property_file() == card_down_file)           \
   {                                                             \
-    Card card = info->player->hand[NUM-1];                      \
-    int suit = (int)card.suit;                                  \
-    int value = (int)card.value;                                \
-    std::string image = "cards/";                               \
-    image.push_back( VALUES[value] );                           \
-    image.push_back( SUITS[suit] );                             \
-    image += ".png";                                            \
+    Player* player = comm->players[ comm->main_player ];        \
+    Card card = player->hand[NUM-1];                            \
+    std::string image = get_card_file(card);                    \
     cards[NUM-1]->set(image);                                   \
   }                                                             \
   else                                                          \
@@ -271,16 +363,31 @@ void  poker_client::on_hand_click_##NUM()                       \
   }                                                             \
 }              
 
-/*
-   TODO: Eventual idea is to make the cards flip when their buttons are clicked
-     flipped cards on their back will indicate to the system that the poker_client wants to
-     trade those cards in
-*/
 HAND_CLICK_METHODS(1)
 HAND_CLICK_METHODS(2)
 HAND_CLICK_METHODS(3)
 HAND_CLICK_METHODS(4)
 HAND_CLICK_METHODS(5)
+
+
+void poker_client::on_bet_value_changed()
+{
+  
+  int bet_value = bet_value_slider->get_value();
+  
+  assert(bet_value >= comm->current_bet); // can't bet less than the current bet
+  
+  // only update call button if it is sensitive
+  if( call_button->is_sensitive() )
+  {
+    call_button->set_label( ( bet_value > comm->current_bet  ) ? raise_action : call_action);
+  }
+  
+  check_button->set_sensitive( bet_value == 0 );
+}
+
+
+// TODO: maybe the functions below would serve better in the client_communicator?
 
 void poker_client::on_play_click()
 {
@@ -290,11 +397,6 @@ void poker_client::on_play_click()
 void poker_client::on_quit_click()
 {
   std::cout << "Check button clicked!" << std::endl;
-}
-
-void poker_client::on_bet_value_changed()
-{
-  std::cout << "poker_client changed their bet to " << bet_value_slider->get_value() << "!" << std::endl;
 }
 
 void poker_client::on_check_click()

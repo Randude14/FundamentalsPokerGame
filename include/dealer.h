@@ -8,6 +8,10 @@
  * Dealer class which acts as server and manages gameplay
  * dealer.cpp to contain the main method that will act as the driver for the server
  */
+ 
+ class Game;
+ 
+#define MAX_PLAYERS 5
 
 class Dealer
 {

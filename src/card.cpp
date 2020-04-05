@@ -7,3 +7,13 @@
 Card::Card(Card_value v, Suit s) : value{v}, suit{s}  { }
 
 Card::~Card() { }
+
+int Card::get_int_value()
+{
+  return static_cast<int>(value);
+}
+
+int Card::get_int_suit()
+{
+  return static_cast<int>(suit);
+}

@@ -2,8 +2,10 @@
 #define PLAYER_H
 
 #include "card.h"
+#include "dealer.h"
 #include <string>
 #include <vector>
+#include <map>
 
 /*
  * Player class which contains the data of a player in the game
@@ -19,12 +21,16 @@ class Player
     Player();             // Set player defaults
     virtual ~Player();
 
+    void calculate_handvalue();  // calculate the player's hand value
+
     int UUID;             // Player attributes
     int table_position;
     std::string name;
-    double wallet;
-    Card hand[NUM_CARDS];
-    double bet_amount;
+    long wallet;
+    std::vector<Card> hand{ std::vector<Card>( NUM_CARDS, Card())  };
+    Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};
+    bool better_hand(Player& other);     // returns true if other player has better hand, otherwise false       
+    long bet_amount;
     bool has_bet;
 };
 

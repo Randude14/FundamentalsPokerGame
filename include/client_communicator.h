@@ -3,23 +3,12 @@
 #define CLIENT_COMMUNICATOR_H
 
 #include "player.h"
+#include "dealer.h"
+#include "poker_client.h"
 #include <iostream>
 
 
-// max players that the client will play against
-#define MAX_OPPONENTS 4
-
-
-// this is used to communicate info to the client
-class client_info
-{
-  public:
-    Player* player;
-    Player* opponents[MAX_OPPONENTS];
-    std::string turn_status;
-    long pot;
-    long current_bet;
-};
+class poker_client;
 
 // poker_client will have a client_communicator object that will connect to the server
 // and pull info to the client that will require input (if it's their turn) that the
@@ -28,18 +17,21 @@ class client_info
 class client_communicator
 {
   public:
-    client_communicator();
-    
-    ~client_communicator();
+    friend class poker_client;
+    client_communicator(poker_client* client, char* argv[]);
+    virtual ~client_communicator();
   
     void close();
-    
-    client_info* get_info();
   
   private:
-    client_info *info; // info that will be updated
+    Player* players[MAX_PLAYERS];      // keep track of player info
+    int num_players;
+    int main_player;                   // index of the player this client is tied to
     
-  
+    std::string turn_status;           // message indicating who the dealer is waiting on
+    long pot;                          // current pot of the game
+    long current_bet;                  // current bet of the game, can be 0 for "check"    
+    poker_client* client;              // client this communicator is tied to
 };
 
 #endif

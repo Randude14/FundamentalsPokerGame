@@ -7,10 +7,11 @@ SERVER = poker_server
 CHAT_CLIENT = chat_client
 CHAT_SERVER = chat_server
 
+TEST = hand_test
 
 # define sources and their object files
 # NOTE: these source files should NOT have a main or make will fail on compile
-SOURCES = src/card.cpp src/game.cpp src/player.cpp src/client_communicator.cpp
+SOURCES = src/card.cpp src/player.cpp src/game.cpp src/client_communicator.cpp
 OBJECTS = $(SOURCES:.cpp=.o) 
 HEADERS = -I./include/ -I./asio-1.12.2/include
 
@@ -25,6 +26,9 @@ CHAT_SERVER_MAIN = src/chat_server.cpp
 CHAT_CLIENT_OBJECT = $(CHAT_CLIENT_MAIN:.cpp=.o)
 CHAT_SERVER_OBJECT = $(CHAT_SERVER_MAIN:.cpp=.o)
 
+TEST_MAIN = src/hand_comp_test.cpp
+TEST_OBJECT = $(TEST_MAIN:.cpp=.o)
+
 # define flags
 CC = g++
 CPPFLAGS += -c -g -std=c++11 -Wall
@@ -32,12 +36,17 @@ CXXFLAGS += -Wall -O0 -g -std=c++11
 GTKFLAGS = `/usr/bin/pkg-config gtkmm-3.0 --cflags --libs`
 THREADFLAGS = -lpthread -pthread
 
-all: asio-1.12.2 $(SERVER) $(CLIENT) $(CHAT_SERVER) $(CHAT_CLIENT)
+all: asio-1.12.2 $(SERVER) $(CLIENT) $(CHAT_SERVER) $(CHAT_CLIENT) $(TEST)
 
 # unpack asio
 asio-1.12.2:
 	tar xzf asio-1.12.2.tar.gz
 
+
+#
+$(TEST): $(TEST_OBJECT) $(OBJECTS)
+	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
+  
 # build exectuables
 $(SERVER): $(SERVER_OBJECT) $(OBJECTS)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)

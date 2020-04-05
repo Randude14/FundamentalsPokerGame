@@ -16,19 +16,27 @@
  /*
  * Macros for application metadata
  */
+ 
+ 
+#define MAX_OPPONENTS MAX_PLAYERS-1
+
+class client_communicator;
+ 
+ // used to store the widgets for opposing players
+class opponent_display
+{
+  public:
+    Gtk::Label *username;
+    Gtk::Label *last_action;
+    Gtk::Label *wallet;
+    Gtk::Image *cards[NUM_CARDS];
+};
 
 class poker_client
 {
   public:
     poker_client();             // Set player defaults
     virtual ~poker_client();
-	
-    struct opponent_display
-    {
-      Gtk::Label *username;
-      Gtk::Label *last_action;
-      Gtk::Image *cards[NUM_CARDS];
-    };
     
     const std::string APP_TITLE{"CSE3310 Poker++"};
     const std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
@@ -44,16 +52,19 @@ class poker_client
   
     client_communicator *comm;
     
-    client_info *info;
-    
     // vector for the widgets of the other players
     // will get updated from time to time
-    opponent_display opp_displays[MAX_OPPONENTS];
+    opponent_display* opp_displays[MAX_OPPONENTS];
     
     const std::string card_directory = "cards/";
     const std::string card_down_file = card_directory + "card_down.png";
-    const std::string SUITS = "HSDC";
-    const std::string VALUES = " A23456789TJQK"; // use space as offset
+    const std::string suits = "HSDC";
+    const std::string values = " A23456789TJQKA"; // use space as offset
+    
+    const std::string blank_name = "Empty seat"; // for seats with no players
+    
+    const std::string call_action = "Call\n";    // used in switching the call/raise button
+    const std::string raise_action = "Raise\n";
     
       // Callbacks for the UI widgets for the player
     
@@ -64,7 +75,6 @@ class poker_client
     void on_check_click();              // Player->check_button     (no bet)
     void on_bet_click();                // Player->bet_button       (player wants to bet)
     void on_call_click();               // Player->call_button      (match current bet)
-    void on_raise_click();              // Player->raise_button     (increase current bet)
     void on_fold_click();               // Player->fold_button      (drop out of hand)
     void on_discard_click();            // Player->discard_button   (exchange 0-3 Cards)
     
@@ -78,7 +88,7 @@ class poker_client
     
     const std::string facedown = "cards/card_down.png";
     
-    private:
+  private:
     
     // References for the UI widgets
     Gtk::Button *play_button;
@@ -93,12 +103,14 @@ class poker_client
     Gtk::Label *turn_status;
     
     // formats for the pot and current_labels
-    std::string pot_label_format = "Pot: %.0f";
-    std::string current_bet_label_format = "Current Bet: %.0f";
+    const char* pot_label_format = "Pot: %ld";
+    const char* current_bet_label_format = "Current Bet: %ld";
+    const char* wallet_label_format = "Wallet: %ld";
     
     // pot and current_bet labels
     Gtk::Label *pot_label;
     Gtk::Label *current_bet_label;
+    Gtk::Label *wallet_label;
     
     Gtk::Button *card_buttons[NUM_CARDS]; // buttons for the player cards
     Gtk::Image *cards[NUM_CARDS];         // images for the player cards
