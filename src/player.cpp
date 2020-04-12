@@ -20,16 +20,24 @@ Player::~Player()
 }
 
 
-bool Player::better_hand(Player& other)
+int Player::compare_hands(Player& other)
 {
   if(hand_ranking != other.hand_ranking)
     return hand_ranking < other.hand_ranking;
   
   for(int i = 0; i < NUM_CARDS; i++)
-    if(hand[i].value <= other.hand[i].value)
-      return true;
-    
-  return false;
+  {
+    if(hand[i].value < other.hand[i].value)
+    {
+      return -1;
+    }
+    else if(hand[i].value > other.hand[i].value)
+    {
+      return 1;
+    }
+  }
+  
+  return 0;
 }
 
 

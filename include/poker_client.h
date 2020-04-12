@@ -74,7 +74,6 @@ class poker_client
     void on_bet_value_changed();        // Player->bet_value_slider (player is adjusting bet)
     void on_check_click();              // Player->check_button     (no bet)
     void on_bet_click();                // Player->bet_button       (player wants to bet)
-    void on_call_click();               // Player->call_button      (match current bet)
     void on_fold_click();               // Player->fold_button      (drop out of hand)
     void on_discard_click();            // Player->discard_button   (exchange 0-3 Cards)
     
@@ -96,7 +95,6 @@ class poker_client
     Gtk::Range *bet_value_slider;
     Gtk::Button *check_button;    
     Gtk::Button *bet_button;
-    Gtk::Button *call_button;
     Gtk::Button *fold_button;
     Gtk::Button *discard_button;
     Gtk::Label *username;

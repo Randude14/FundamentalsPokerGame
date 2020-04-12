@@ -199,6 +199,13 @@ private:
   chat_room room_;
 };
 
+
+
+
+// NO LONGER NEEDED
+
+
+
 //----------------------------------------------------------------------
 
 int main(int argc, char* argv[])

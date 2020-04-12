@@ -5,7 +5,6 @@
 #include "poker_client.h"
 #include "player.h"
 #include "card.h"
-#include "json.hpp"
 
 
 
@@ -144,8 +143,7 @@ int poker_client::run(int argc, char* argv[])
     
   // connect poker_client control buttons
   GET_AND_CONNECT( "check",     check_button,   &poker_client::on_check_click )
-  GET_AND_CONNECT( "bet_raise", bet_button,     &poker_client::on_bet_click )
-  GET_AND_CONNECT( "call",      call_button,    &poker_client::on_call_click )
+  GET_AND_CONNECT( "bet",       bet_button,     &poker_client::on_bet_click )
   GET_AND_CONNECT( "fold",      fold_button,    &poker_client::on_fold_click )
   GET_AND_CONNECT( "discard",   discard_button, &poker_client::on_discard_click )
   
@@ -323,20 +321,6 @@ void poker_client::update_client(bool showcards)
   bet_value_slider->set_range(comm->current_bet, main_player->wallet);
   
   
-  // no sense in enabling call button if there is not bet yet
-  if(comm->current_bet == 0)
-  {
-    call_button->set_sensitive(false);
-  }
-  
-  // enable call button and update label to call, raising
-  // the bet slider forward indicates the player wants to raise
-  else
-  {
-    call_button->set_sensitive(true);
-    call_button->set_label(call_action);
-  }
-  
   // enable check button based on the current bet
   check_button->set_sensitive( comm->current_bet == 0 );
 }
@@ -377,49 +361,37 @@ void poker_client::on_bet_value_changed()
   
   assert(bet_value >= comm->current_bet); // can't bet less than the current bet
   
-  // only update call button if it is sensitive
-  if( call_button->is_sensitive() )
-  {
-    call_button->set_label( ( bet_value > comm->current_bet  ) ? raise_action : call_action);
-  }
-  
   check_button->set_sensitive( bet_value == 0 );
 }
-
 
 // TODO: maybe the functions below would serve better in the client_communicator?
 
 void poker_client::on_play_click()
 {
-  std::cout << "Check button clicked!" << std::endl;
+  comm->write_message("play");
 }
 
 void poker_client::on_quit_click()
 {
-  std::cout << "Check button clicked!" << std::endl;
+  comm->write_message("quit");
 }
 
 void poker_client::on_check_click()
 {
-  std::cout << "Check button clicked!" << std::endl;
+  comm->write_message("check");
 }
 
 void poker_client::on_bet_click()
 {
-  std::cout << "Bet button clicked!" << std::endl;
-}
-
-void poker_client::on_call_click()
-{
-  std::cout << "Call button clicked!" << std::endl;
+  comm->write_message("bet");
 }
 
 void poker_client::on_fold_click()
 {
-  std::cout << "Fold button clicked!" << std::endl;
+  comm->write_message("fold");
 }
 
 void poker_client::on_discard_click()
 {
-  std::cout << "Discard button clicked!" << std::endl;
+  comm->write_message("discard");
 }

@@ -28,10 +28,13 @@ class Player
     std::string name;
     long wallet;
     std::vector<Card> hand{ std::vector<Card>( NUM_CARDS, Card())  };
-    Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};
-    bool better_hand(Player& other);     // returns true if other player has better hand, otherwise false       
     long bet_amount;
     bool has_bet;
+    
+    Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};
+    
+    // -1 if other player has a better hand, 1 if this player has the better hand and 0 for tie
+    int compare_hands(Player& other);     
 };
 
 #endif // PLAYER_H

@@ -1,3 +1,5 @@
+#define WITH_DEALER
+
 #include "player.h"
 #include "card.h"
 #include <iostream>
@@ -38,7 +40,7 @@ int main()
   std::cout << std::endl << std::endl;
   std::cout << "Hand ranking: " << (int)p.hand_ranking << std::endl;
   std::cout << "Hand ranking: " << (int)p1.hand_ranking << std::endl;
-  std::cout << "Player 1 < Player 2 - " << (p.better_hand(p1) ? "true" : "false") << std::endl;
+  std::cout << "Player 1 and Player 2 (-1 for player 2, 1 for player 1, and 0 for tie): " << p.compare_hands(p1) << std::endl;
   
   return 0;
 }

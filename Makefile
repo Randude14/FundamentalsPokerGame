@@ -4,7 +4,6 @@
 CLIENT = poker_client
 SERVER = poker_server
 
-CHAT_CLIENT = chat_client
 CHAT_SERVER = chat_server
 
 TEST = hand_test
@@ -21,9 +20,7 @@ SERVER_MAIN = src/dealer.cpp
 CLIENT_OBJECT = $(CLIENT_MAIN:.cpp=.o)
 SERVER_OBJECT = $(SERVER_MAIN:.cpp=.o)
 
-CHAT_CLIENT_MAIN = src/chat_client.cpp
 CHAT_SERVER_MAIN = src/chat_server.cpp
-CHAT_CLIENT_OBJECT = $(CHAT_CLIENT_MAIN:.cpp=.o)
 CHAT_SERVER_OBJECT = $(CHAT_SERVER_MAIN:.cpp=.o)
 
 TEST_MAIN = src/hand_comp_test.cpp
@@ -36,7 +33,7 @@ CXXFLAGS += -Wall -O0 -g -std=c++11
 GTKFLAGS = `/usr/bin/pkg-config gtkmm-3.0 --cflags --libs`
 THREADFLAGS = -lpthread -pthread
 
-all: asio-1.12.2 $(SERVER) $(CLIENT) $(CHAT_SERVER) $(CHAT_CLIENT) $(TEST)
+all: asio-1.12.2 $(SERVER) $(CLIENT) $(CHAT_SERVER) $(TEST)
 
 # unpack asio
 asio-1.12.2:
@@ -54,21 +51,31 @@ $(SERVER): $(SERVER_OBJECT) $(OBJECTS)
 $(CLIENT): $(CLIENT_OBJECT) $(OBJECTS)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
 	
-$(CHAT_CLIENT): $(CHAT_CLIENT_OBJECT)
-	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
-	
 $(CHAT_SERVER): $(CHAT_SERVER_OBJECT)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
+  
+  
+  
+#run commands
+server: $(CHAT_SERVER)
+	./$(CHAT_SERVER) 9000
+    
+client: $(CLIENT)
+	./$(CLIENT) 127.0.0.1 9000
+  
 
 # build objects from source files
 .cpp.o: $(HEADERS)
 	$(CC) $(HEADERS) $(CPPFLAGS) $(GTKFLAGS) $(THREADFLAGS) $< -o $@
 
+.hpp.o: $(HEADERS)
+	$(CC) $(HEADERS) $(CPPFLAGS) $(GTKFLAGS) $(THREADFLAGS) $< -o $@
+  
+  
 # remove executables and asio lib
 clean :
 	-rm -rf asio-1.12.2
 	-rm -f $(CLIENT)
 	-rm -f $(SERVER)
-	-rm -f $(CHAT_CLIENT)
 	-rm -f $(CHAT_SERVER)
 	-rm -f src/*.o
