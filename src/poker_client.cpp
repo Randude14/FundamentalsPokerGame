@@ -3,6 +3,7 @@
 #include <signal.h>
 
 #include "poker_client.h"
+#include "play_window.h"
 #include "player.h"
 #include "card.h"
 
@@ -38,7 +39,7 @@ int main(int argc, char* argv[])
   
   // client object and run
   client = new poker_client();
-  int status = client->run(argc, argv);
+  int status = client->run();
   
   delete client;
   client = NULL;
@@ -59,44 +60,31 @@ poker_client::~poker_client() { }
 
 
 // Called by main
-// TODO: using the args, connect to dealer
-int poker_client::run(int argc, char* argv[])
+int poker_client::run()
 {
   
-  if(argc < 3)
+  auto login_app = Gtk::Application::create("poker.login.window");
+  
+  play_window* play_quit_window = new play_window();
+   
+  login_app->run(*play_quit_window);
+  // grab info from play_quit_window before freeing memory
+  std::string playername = play_quit_window->username;
+  std::string host = play_quit_window->host;
+  std::string port = play_quit_window->port;
+  bool should_quit = play_quit_window->should_quit;
+  
+  delete play_quit_window;
+   
+  // user clicked quit
+  if(should_quit)
   {
-    std::cout << argv[0] << " <host> <port>" << std::endl;
-    return 1;
+    return 0;
   }
-  
-  
-  auto app = Gtk::Application::create(APP_NAME);
-  
-  
-  // READ THIS ****************
-  
-  /*
-   Window *play_quit_window = ....
    
-   app->run(play_quit_window);
-   
-   if(user_clicked_quit)
-   {
-     return 0;
-   }
-   
-   
-   // if play was clicked, continue as is....
-   
-   
-   */
-  
-  
+  // if play was clicked, continue as is....
   
   std::cout << "Starting the " << APP_TITLE << " client for version " << VERSION << "...." << std::endl;
-    
-  // create window object pointer
-  Gtk::Window* win;
   
   // Create the builder
   auto refBuilder = Gtk::Builder::create();
@@ -125,20 +113,20 @@ int poker_client::run(int argc, char* argv[])
     VAR->signal_clicked().connect(sigc::mem_fun(*this, FUNC));
     
   // get the window object from the referrence builder
-  GET_WIDGET("Poker++", win);
+  GET_WIDGET("Poker++", main_window);
   
   // set title....the builder apparently changes the title from the glade file. No biggie
-  win->set_title(APP_TITLE);  
+  main_window->set_title(APP_TITLE);  
   
   // create communicator
-  comm = new client_communicator(this, argv);
+  comm = new client_communicator(this, host, port);
  
   comm->current_bet = 10;
   comm->pot = 5;
   
   // get main player
   Player* player = comm->players[comm->main_player];
-  player->name = "Player 1";
+  player->name = playername;
   player->wallet = 100;
     
   // connect poker_client control buttons
@@ -213,7 +201,8 @@ int poker_client::run(int argc, char* argv[])
   update_client();
   
   // Run the window
-  int ret = app->run(*win);
+  auto main_app = Gtk::Application::create(APP_NAME);
+  int ret = main_app->run(*main_window);
   
   this->close();
 
@@ -235,6 +224,13 @@ void poker_client::close()
   
   // free memory and return the exit status of the client
   std::cout << std::endl << "Client has been closed." << std::endl;
+}
+
+// called by the communication thread when a connection failed
+// close the main window, this will trigger the app->run() to terminate and clean exit
+void poker_client::connection_failed()
+{
+  main_window->close();
 }
 
 

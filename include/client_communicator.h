@@ -30,13 +30,13 @@ class client_communicator
 {
   public:
     friend class poker_client;
-    client_communicator(poker_client* client, char* argv[]);
+    client_communicator(poker_client* client, std::string host, std::string port);
     virtual ~client_communicator();
   
     void close();
-    void client_run();                 // runs async waiting for data to be read from dealer/server
-    void asio_run(char* argv[]);       // runs the io context to read the data
-    void message_readin(std::string);  // message is read in from chat_client
+    void client_run();                                 // runs async waiting for data to be read from dealer/server
+    void asio_run(std::string host, std::string port); // runs the io context to read the data
+    void message_readin(std::string);                  // message is read in from chat_client
     
     void send_message();
   
@@ -50,6 +50,7 @@ class client_communicator
     long current_bet;                  // current bet of the game, can be 0 for "check" 
     poker_client* client;              // client this communicator is tied to
     
+    bool failed;                       // flag to signal connection failed
     chat_client* comm;                 // this will connect with the dealer/server
     asio::io_context io_context;
     std::thread* comm_t;               // thread to run the asio and chat_client

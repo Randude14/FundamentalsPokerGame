@@ -10,9 +10,12 @@ TEST = hand_test
 
 # define sources and their object files
 # NOTE: these source files should NOT have a main or make will fail on compile
-SOURCES = src/card.cpp src/player.cpp src/game.cpp src/client_communicator.cpp
+SOURCES = src/card.cpp src/player.cpp src/game.cpp
 OBJECTS = $(SOURCES:.cpp=.o) 
 HEADERS = -I./include/ -I./asio-1.12.2/include
+
+CLIENT_DEPEND = src/play_window.cpp src/client_communicator.cpp $(SOURCES)
+CLIENT_DEPEND_OBJECTS = $(CLIENT_DEPEND:.cpp=.o) 
 
 # define main files and their object files
 CLIENT_MAIN = src/poker_client.cpp
@@ -39,8 +42,6 @@ all: asio-1.12.2 $(SERVER) $(CLIENT) $(CHAT_SERVER) $(TEST)
 asio-1.12.2:
 	tar xzf asio-1.12.2.tar.gz
 
-
-#
 $(TEST): $(TEST_OBJECT) $(OBJECTS)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
   
@@ -48,7 +49,7 @@ $(TEST): $(TEST_OBJECT) $(OBJECTS)
 $(SERVER): $(SERVER_OBJECT) $(OBJECTS)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
 
-$(CLIENT): $(CLIENT_OBJECT) $(OBJECTS)
+$(CLIENT): $(CLIENT_OBJECT) $(CLIENT_DEPEND_OBJECTS)
 	$(CC) $^ -o $@ $(GTKFLAGS) $(THREADFLAGS)
 	
 $(CHAT_SERVER): $(CHAT_SERVER_OBJECT)
@@ -66,9 +67,6 @@ client: $(CLIENT)
 
 # build objects from source files
 .cpp.o: $(HEADERS)
-	$(CC) $(HEADERS) $(CPPFLAGS) $(GTKFLAGS) $(THREADFLAGS) $< -o $@
-
-.hpp.o: $(HEADERS)
 	$(CC) $(HEADERS) $(CPPFLAGS) $(GTKFLAGS) $(THREADFLAGS) $< -o $@
   
   

@@ -20,6 +20,7 @@ void Dealer::shuffle()
 {
 
 }
+
 void Dealer::deal()
 {
 

@@ -44,9 +44,10 @@ class poker_client
     
     // run the player client given the arguments
     // returns the exit status of the client window
-    int run(int argc, char* argv[]);
+    int run();
     
-    void close();                        // called when client window closes
+    void close(); // called when client window closes
+    void connection_failed();
 	
   protected:
   
@@ -90,6 +91,7 @@ class poker_client
   private:
     
     // References for the UI widgets
+    Gtk::Window *main_window;
     Gtk::Button *play_button;
     Gtk::Button *quit_button;
     Gtk::Range *bet_value_slider;

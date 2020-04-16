@@ -10,7 +10,7 @@
  * Game class to maintain game state
  */
  
- class Player;
+class Player;
 
 class Game
 {
