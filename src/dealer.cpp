@@ -36,8 +36,14 @@ void Dealer::determine_winner()
 
 }
 
-int main(int argc, char* argv[])
+int current_bet = 0;
+
+void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
 {
-	std::cout << "Dealer!" << std::endl;
-	return 0;
+  std::string action = to_dealer["action"];
+  std::cout << "Player invoked " << action << std::endl;
+  
+  current_bet = to_dealer["current_bet"];
+  
+  to_player["current_bet"] = current_bet;
 }

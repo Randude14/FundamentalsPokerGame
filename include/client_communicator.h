@@ -54,7 +54,7 @@ class client_communicator
     chat_client* comm;                 // this will connect with the dealer/server
     asio::io_context io_context;
     std::thread* comm_t;               // thread to run the asio and chat_client
-    void write_message(std::string);   // write message to chat_client
+    void send_action(std::string action, int bet=0);   // write message to chat_client
 };
 
 using asio::ip::tcp;
@@ -113,6 +113,11 @@ private:
         {
           if (!ec && read_msg_.decode_header())
           {
+            for (unsigned int i=0;i<chat_message::max_body_length;i++)
+            {
+                read_msg_.body() [i] = '\0';
+            }
+            
             do_read_body();
           }
           else
@@ -131,9 +136,17 @@ private:
           if (!ec)
           {
             std::string str = read_msg_.body();
-            str = str.substr(0, read_msg_.body_length()); // trim off end...
             
-            comm->message_readin(str);
+            try 
+            {
+              comm->message_readin(str);
+            }
+            catch(std::exception& say)
+            {
+              std::cout << "Error processing '" << read_msg_.body() << "'" << std::endl;
+              std::cout << say.what() << std::endl;
+            }
+            
             do_read_header();
           }
           else

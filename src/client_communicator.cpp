@@ -75,11 +75,16 @@ void client_communicator::asio_run(std::string host, std::string port)
 
 void client_communicator::message_readin(std::string message)
 {
-  std::cout << message << std::endl;
+  nlohmann::json to_player = nlohmann::json::parse( message );
+  
+  current_bet = to_player["current_bet"];
+  
+  client->update_client();
 }
 
-void client_communicator::write_message(std::string action)
+void client_communicator::send_action(std::string action, int bet)
 {
+  current_bet = bet;
   
   //Player* main_player = players[main_player];
   
@@ -89,7 +94,7 @@ void client_communicator::write_message(std::string action)
   // this field is important....this tells the dealer who sent this action
   to_dealer["table_pos"] = 0;//main_player->table_position;
   
-  to_dealer["test"] = "Some message...";
+  to_dealer["current_bet"] = current_bet;
   std::string t = to_dealer.dump();
   
   chat_message msg;

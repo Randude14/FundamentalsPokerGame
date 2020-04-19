@@ -18,7 +18,12 @@
 #include <set>
 #include <utility>
 #include "asio.hpp"
+#include "json.hpp"
 #include "chat_message.hpp"
+
+#include "dealer.h"
+
+class Dealer;
 
 using asio::ip::tcp;
 
@@ -42,25 +47,18 @@ typedef std::shared_ptr<chat_participant> chat_participant_ptr;
 class chat_room
 {
 public:
-  // CSE3310 previous chat messages are sent to a client	
   void join(chat_participant_ptr participant)
   {
     participants_.insert(participant);
-    for (auto msg: recent_msgs_)
-      participant->deliver(msg);
   }
 
   void leave(chat_participant_ptr participant)
   {
     participants_.erase(participant);
   }
-  
-  // CSE3310 messages are sent to all connected clients
+
   void deliver(const chat_message& msg)
   {
-    recent_msgs_.push_back(msg);
-    while (recent_msgs_.size() > max_recent_msgs)
-      recent_msgs_.pop_front();
 
     for (auto participant: participants_)
       participant->deliver(msg);
@@ -68,8 +66,6 @@ public:
 
 private:
   std::set<chat_participant_ptr> participants_;
-  enum { max_recent_msgs = 100 }; // CSE3310 maximum number of messages are stored
-  chat_message_queue recent_msgs_;
 };
 
 //----------------------------------------------------------------------
@@ -79,9 +75,10 @@ class chat_session
     public std::enable_shared_from_this<chat_session>
 {
 public:
-  chat_session(tcp::socket socket, chat_room& room)
+  chat_session(tcp::socket socket, chat_room& room, Dealer* d)
     : socket_(std::move(socket)),
-      room_(room)
+      room_(room),
+      dealer{d}
   {
   }
 
@@ -111,6 +108,14 @@ private:
         {
           if (!ec && read_msg_.decode_header())
           {
+            // clear out the old buffer from the last read
+            // a '\0' is a good value to make sure a string
+            // is terminated
+            for (unsigned int i=0;i<chat_message::max_body_length;i++)
+            {
+                read_msg_.body() [i] = '\0';
+            }
+
             do_read_body();
           }
           else
@@ -129,7 +134,44 @@ private:
         {
           if (!ec)
           {
-            room_.deliver(read_msg_);
+        
+            nlohmann::json to_dealer = nlohmann::json::parse(std::string(read_msg_.body()));
+            nlohmann::json to_player;  // represents the entire game state.  sent to all players
+            /*
+            to_player["turn"] = "3f96b414-9ac9-40b5-8007-90d0e771f0d0";   // UUID of the current player. 
+            to_player["chat"] = to_dealer["chat"];
+            to_player["dealer_comment"] = "fred has raised and received 2 new cards";
+            to_player["recommended_play"] = "you should fold";
+            to_player["hand"] = { 
+              {{"bet",1},{"current_bet",10}, {"uuid","3f96b414-9ac9-40b5-8007-90d0e771f0d0"} , {"name","Bud"} ,{"cards",{"acespades","10hearts","9clubs","2diamonds","kinghearts"}}},
+              {{"bet",2},{"current_bet",1}, {"uuid","3f96b414-9ac9-40b5-8007-20d0e771f0d0"} , {"name","Donald"} ,{"cards",{"acehearts","10spades","9clubs","2clubs","jackhearts"}}},
+              {{"bet",5},{"current_bet",5}, {"uuid","3f96b414-9ac9-40b5-8007-30d0e771f0d0"} , {"name","Ann"} ,{"cards",{"aceclubs","10diamonds","9clubs","2hearts","queenhearts"}}},
+              {{"bet",10},{"current_bet",0}, {"uuid","3f96b414-9ac9-40b5-8007-40d0e771f0d0"} , {"name","Melania"} ,{"cards",{"acediamonds","10clubs","9clubs","2spades","kinghearts"}}}
+                       };
+   
+            //std::cout << "to player:" << std::endl;
+            //std::cout << to_player.dump(2) << std::endl;*/
+            
+            try 
+            {
+              dealer->process( to_dealer, to_player );
+            }
+            catch(std::exception& say)
+            {
+              std::cout << "Error processing '" << read_msg_.body() << "'" << std::endl;
+              std::cout << say.what() << std::endl;
+            }
+            
+            std::string t = to_player.dump();
+            chat_message sending;
+            if (t.size() < chat_message::max_body_length)
+            {
+              std::cout << "Sending '" << t << "' to players" << std::endl;
+              memcpy( sending.body(), t.c_str(), t.size() );
+	            sending.body_length(t.size());
+	            sending.encode_header();
+               room_.deliver(sending);
+            }
             do_read_header();
           }
           else
@@ -164,6 +206,7 @@ private:
 
   tcp::socket socket_;
   chat_room& room_;
+  Dealer* dealer;
   chat_message read_msg_;
   chat_message_queue write_msgs_;
 };
@@ -174,8 +217,8 @@ class chat_server
 {
 public:
   chat_server(asio::io_context& io_context,
-      const tcp::endpoint& endpoint)
-    : acceptor_(io_context, endpoint)
+      const tcp::endpoint& endpoint, Dealer& d)
+    : acceptor_(io_context, endpoint), dealer{&d}
   {
     do_accept();
   }
@@ -188,7 +231,7 @@ private:
         {
           if (!ec)
           {
-            std::make_shared<chat_session>(std::move(socket), room_)->start();
+            std::make_shared<chat_session>(std::move(socket), room_, dealer)->start();
           }
 
           do_accept();
@@ -196,14 +239,9 @@ private:
   }
 
   tcp::acceptor acceptor_;
+  Dealer* dealer;
   chat_room room_;
 };
-
-
-
-
-// NO LONGER NEEDED
-
 
 
 //----------------------------------------------------------------------
@@ -214,19 +252,22 @@ int main(int argc, char* argv[])
   {
     if (argc < 2)
     {
-      std::cerr << "Usage: chat_server <port> [<port> ...]\n";
+      std::cerr << "Usage: chat_server <port>\n";
       return 1;
     }
+    
+    std::cout << "Starting dealer server..." << std::endl;
+    
+    // create dealer object
+    Dealer dealer;
 
+    // only need one server
     asio::io_context io_context;
-
-    std::list<chat_server> servers;
-    for (int i = 1; i < argc; ++i)
-    {
-      tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));
-      servers.emplace_back(io_context, endpoint);
-    }
-
+    tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[1]));
+    
+    chat_server server( io_context, endpoint, dealer );
+    std::cout << "Dealer started." << std::endl;
+    
     io_context.run();
   }
   catch (std::exception& e)

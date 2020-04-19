@@ -42,6 +42,9 @@ class poker_client
     const std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
     const std::string VERSION{"0.1"};
     
+    // called when new info is read in from server
+    void update_client(bool showcards=false);  
+    
     // run the player client given the arguments
     // returns the exit status of the client window
     int run();
@@ -60,21 +63,20 @@ class poker_client
     const std::string card_directory = "cards/";
     const std::string card_down_file = card_directory + "card_down.png";
     const std::string suits = "HSDC";
-    const std::string values = " A23456789TJQKA"; // use space as offset
+    const std::string values = "  23456789TJQKA"; // use space as offset
     
     const std::string blank_name = "Empty seat"; // for seats with no players
     
-    const std::string call_action = "Call\n";    // used in switching the call/raise button
-    const std::string raise_action = "Raise\n";
+    const std::string call_action = "Call";    // used in switching the call/raise button
+    const std::string raise_action = "Raise";
     
       // Callbacks for the UI widgets for the player
     
                                         // "widget name"            "widget action"
-    void on_play_click();               // Player->play_button      (play a new game)
-    void on_quit_click();               // Player->quit_button      (quit the game)
     void on_bet_value_changed();        // Player->bet_value_slider (player is adjusting bet)
     void on_check_click();              // Player->check_button     (no bet)
     void on_bet_click();                // Player->bet_button       (player wants to bet)
+    void on_call_click();               // Player->call_button      (player wants to call)
     void on_fold_click();               // Player->fold_button      (drop out of hand)
     void on_discard_click();            // Player->discard_button   (exchange 0-3 Cards)
     
@@ -92,11 +94,10 @@ class poker_client
     
     // References for the UI widgets
     Gtk::Window *main_window;
-    Gtk::Button *play_button;
-    Gtk::Button *quit_button;
     Gtk::Range *bet_value_slider;
     Gtk::Button *check_button;    
     Gtk::Button *bet_button;
+    Gtk::Button *call_button;
     Gtk::Button *fold_button;
     Gtk::Button *discard_button;
     Gtk::Label *username;
@@ -117,7 +118,6 @@ class poker_client
     // End referrences
     
     std::string get_card_file(Card card);      // get card image file from card
-    void update_client(bool showcards=false);  // called when new info is read in from server
     void reset_sensitivity();                  // Reset button sensitivity based on game state
 
 };

@@ -55,16 +55,19 @@ play_window::play_window()
   vbox->pack_start(*textbox);
   textbox->pack_start(*nameL);
   textbox->pack_start(*nameE);
+  nameE->set_max_length(25);
   
   vbox->pack_start(*hostbox);
   hostbox->pack_start(*hostL);
   hostbox->pack_start(*hostE);
   hostE->set_text("127.0.0.1");
+  hostE->set_max_length(25);
   
   vbox->pack_start(*portbox);
   portbox->pack_start(*portL);
   portbox->pack_start(*portE);
   portE->set_text("9000");
+  portE->set_max_length(25);
   
   L->set_text(" ");
   vbox->pack_start(*L);

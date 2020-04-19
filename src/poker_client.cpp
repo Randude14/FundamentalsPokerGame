@@ -104,7 +104,7 @@ int poker_client::run()
   // if widget was not found, return 1 and alert system
   #define GET_WIDGET(ID, VAR)             \
     refBuilder->get_widget(ID, VAR);      \
-    if(VAR == nullptr) { std::cerr << "Failed to find widget for " << VAR << std::endl; return 1; }
+    if(VAR == nullptr) { std::cerr << "Failed to find widget for " << ID << std::endl; return 1; }
   
   // Hook in widgets
   // macro finds widget with ID and sets to VAR while connecting its callback to FUNC
@@ -121,7 +121,7 @@ int poker_client::run()
   // create communicator
   comm = new client_communicator(this, host, port);
  
-  comm->current_bet = 10;
+  comm->current_bet = 0;
   comm->pot = 5;
   
   // get main player
@@ -132,6 +132,7 @@ int poker_client::run()
   // connect poker_client control buttons
   GET_AND_CONNECT( "check",     check_button,   &poker_client::on_check_click )
   GET_AND_CONNECT( "bet",       bet_button,     &poker_client::on_bet_click )
+  GET_AND_CONNECT( "call",      call_button,     &poker_client::on_call_click )
   GET_AND_CONNECT( "fold",      fold_button,    &poker_client::on_fold_click )
   GET_AND_CONNECT( "discard",   discard_button, &poker_client::on_discard_click )
   
@@ -214,13 +215,16 @@ int poker_client::run()
 // ***** CLOSE CLIENT **********
 void poker_client::close()
 {
-  comm->close();
+  if(comm)
+  {
+    comm->close();
+    delete comm;
+    comm = NULL;
+  }
   
   for(int i = 0; i < MAX_OPPONENTS; i++)
-    delete opp_displays[i];
-  
-  delete comm;
-  comm = NULL;
+    if(opp_displays[i])
+      delete opp_displays[i];
   
   // free memory and return the exit status of the client
   std::cout << std::endl << "Client has been closed." << std::endl;
@@ -245,11 +249,9 @@ std::string poker_client::get_card_file(Card card)
 }
 
 
-// updatet the client GUI....eventually to be called by client_communicator
 void poker_client::update_client(bool showcards)
 {
   int od_index = 0;
-  char buffer[50]; // used to format labels...
   
   for(int i = 0; i < MAX_PLAYERS; i++) // update opponents info
   {
@@ -263,7 +265,11 @@ void poker_client::update_client(bool showcards)
       for(int i = 0; i < NUM_CARDS; i++) // update cards
       {
         std::string image_file = get_card_file(player->hand[i]);
-        cards[i]->set(image_file);
+        // only update image file when needed
+        if(image_file != cards[i]->property_file())
+        {
+          cards[i]->set(image_file);
+        }
         card_buttons[i]->set_sensitive(true);
       } 
     }
@@ -281,7 +287,10 @@ void poker_client::update_client(bool showcards)
       for(int j = 0; j < NUM_CARDS; j++) // update cards
       {
         std::string image_file = (showcards) ? get_card_file(opp->hand[j]) : card_down_file;
-        od->cards[i]->set(image_file);
+        if(image_file != od->cards[j]->property_file())
+        {
+          od->cards[j]->set(image_file);
+        }
       }   
     }
     
@@ -293,24 +302,29 @@ void poker_client::update_client(bool showcards)
       od->username->set_label(blank_name);
       od->last_action->set_label("");
       od->wallet->set_label("");
+      std::string image_file = card_down_file;
       for(int j = 0; j < NUM_CARDS; j++) // update cards
       {
-        od->cards[i]->set(card_down_file);
+        if(image_file != od->cards[j]->property_file())
+        {
+          od->cards[j]->set(image_file);
+        }
       }  
     }
   }
   
+  char buffer[50]; // used to format labels...
   Player* main_player = comm->players[ comm->main_player ];
   
   // update wallet label
   sprintf(buffer, wallet_label_format, main_player->wallet);
   wallet_label->set_label(buffer);
   
-  // update wallet label
+  // update pot label
   sprintf(buffer, pot_label_format, comm->pot);
   pot_label->set_label(buffer);
   
-  // update wallet label
+  // update bet label
   sprintf(buffer, current_bet_label_format, comm->current_bet);
   current_bet_label->set_label(buffer);
   
@@ -319,6 +333,10 @@ void poker_client::update_client(bool showcards)
   
   // enable check button based on the current bet
   check_button->set_sensitive( comm->current_bet == 0 );
+  call_button->set_sensitive( comm->current_bet != 0 );
+  bet_button->set_sensitive( 0 );
+  
+  main_window->queue_draw();
 }
 
 
@@ -352,42 +370,41 @@ HAND_CLICK_METHODS(5)
 
 void poker_client::on_bet_value_changed()
 {
-  
   int bet_value = bet_value_slider->get_value();
   
-  assert(bet_value >= comm->current_bet); // can't bet less than the current bet
-  
-  check_button->set_sensitive( bet_value == 0 );
-}
-
-// TODO: maybe the functions below would serve better in the client_communicator?
-
-void poker_client::on_play_click()
-{
-  comm->write_message("play");
-}
-
-void poker_client::on_quit_click()
-{
-  comm->write_message("quit");
+  //assert(bet_value >= comm->current_bet); // can't bet less than the current bet
+  bet_button->set_sensitive( bet_value != 0 );
 }
 
 void poker_client::on_check_click()
 {
-  comm->write_message("check");
+  // can't check if there is a bet
+  //assert( comm->current_bet <= 0 );
+  comm->send_action("check");
 }
 
 void poker_client::on_bet_click()
 {
-  comm->write_message("bet");
+  // bet current amount
+  int bet = bet_value_slider->get_value();
+  //assert(bet >= comm->current_bet);
+  
+  // internally this is a call rather than a bet
+  comm->send_action("bet", bet); 
+}
+
+void poker_client::on_call_click()
+{
+  // set bet value slider to current bet
+  comm->send_action("call", comm->current_bet );
 }
 
 void poker_client::on_fold_click()
 {
-  comm->write_message("fold");
+  comm->send_action("fold");
 }
 
 void poker_client::on_discard_click()
 {
-  comm->write_message("discard");
+  comm->send_action("discard");
 }
