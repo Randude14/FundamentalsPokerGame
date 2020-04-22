@@ -7,6 +7,7 @@
 
 Player::Player()
 {
+  UUID = boost::uuids::random_generator()();
   wallet = 100.0;
   bet_amount = 0.0;
   name = "unknown";
