@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 /*
  * Player class which contains the data of a player in the game
@@ -23,7 +26,8 @@ class Player
 
     void calculate_handvalue();  // calculate the player's hand value
 
-    int UUID;             // Player attributes
+    // Player attributes
+    boost::uuids::uuid UUID;
     int table_position;
     std::string name;
     long wallet;
