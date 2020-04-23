@@ -80,19 +80,19 @@ void Game::write_game_state(nlohmann::json& to_player)
   // add player info to json
   for(unsigned int i = 0; i < players.size(); i++)
   {
-    Player* player = players.at(i);
-    to_player["players"][i]["name"] = player->name;
+    Player player = players.at(i);
+    to_player["players"][i]["name"] = player.name;
     //to_player["players"][i]["uuid"] = player->UUID;
-    to_player["players"][i]["wallet"] = player->wallet;
-    to_player["players"][i]["bet_amount"] = player->bet_amount;
-    to_player["players"][i]["has_bet"] = player->has_bet;
+    to_player["players"][i]["wallet"] = player.wallet;
+    to_player["players"][i]["bet_amount"] = player.bet_amount;
+    to_player["players"][i]["has_bet"] = player.has_bet;
     
     // write player's hand
     for(int j = 0; j < NUM_CARDS; j++)
     {
-      std::string hand_string = std::to_string( static_cast<int>(player->hand[j].suit) );
+      std::string hand_string = std::to_string( static_cast<int>(player.hand[j].suit) );
       hand_string += std::string(" ");
-      hand_string += std::to_string(static_cast<int>(player->hand[j].suit));
+      hand_string += std::to_string(static_cast<int>(player.hand[j].suit));
       to_player["players"][i]["cards"][j] = hand_string;
     }
   }
