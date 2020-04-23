@@ -5,10 +5,10 @@
 #include "dealer.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <map>/*
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_io.hpp>*/
 
 /*
  * Player class which contains the data of a player in the game
@@ -27,12 +27,12 @@ class Player
     void calculate_handvalue();  // calculate the player's hand value
 
     // Player attributes
-    boost::uuids::uuid UUID;
+    //boost::uuids::uuid UUID;
     int table_position;
     std::string name;
-    long wallet;
-    std::vector<Card> hand{ std::vector<Card>( NUM_CARDS, Card())  };
-    long bet_amount;
+    double wallet;
+    std::vector<Card> hand;
+    double bet_amount;
     bool has_bet;
     
     Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};

@@ -108,7 +108,7 @@ int poker_client::run()
   
   // Hook in widgets
   // macro finds widget with ID and sets to VAR while connecting its callback to FUNC
-  #define GET_AND_CONNECT(ID, VAR, FUNC)  \
+  #define GET_AND_CONNECT(ID, VAR, FUNC)         \
     GET_WIDGET(ID, VAR)                          \
     VAR->signal_clicked().connect(sigc::mem_fun(*this, FUNC));
     
@@ -124,22 +124,40 @@ int poker_client::run()
   comm->current_bet = 0;
   comm->pot = 5;
   
+  
   // get main player
-  Player* player = comm->players[comm->main_player];
+  for(int i = 0; i < MAX_PLAYERS; i++)
+    players.push_back( new Player() );
+  
+  num_players = 1;
+  main_player = 0;
+  
+  Player* player = players[main_player];
   player->name = playername;
   player->wallet = 100;
-    
+  // set default values for player's hand....these will be removed later
+  Card c1{Card_value::TEN, Suit::CLUB};
+  Card c2{Card_value::JACK, Suit::CLUB};
+  Card c3{Card_value::QUEEN, Suit::CLUB};
+  Card c4{Card_value::KING, Suit::CLUB};
+  Card c5{Card_value::ACE, Suit::CLUB};
+  player->hand.push_back(c1);
+  player->hand.push_back(c2);
+  player->hand.push_back(c3);
+  player->hand.push_back(c4);
+  player->hand.push_back(c5);
+   
   // connect poker_client control buttons
   GET_AND_CONNECT( "check",     check_button,   &poker_client::on_check_click )
   GET_AND_CONNECT( "bet",       bet_button,     &poker_client::on_bet_click )
-  GET_AND_CONNECT( "call",      call_button,     &poker_client::on_call_click )
+  GET_AND_CONNECT( "call",      call_button,    &poker_client::on_call_click )
   GET_AND_CONNECT( "fold",      fold_button,    &poker_client::on_fold_click )
   GET_AND_CONNECT( "discard",   discard_button, &poker_client::on_discard_click )
   
   // get range and connect the value changed method
   GET_WIDGET("bet_slider", bet_value_slider)
   bet_value_slider->signal_value_changed().connect( sigc::mem_fun(*this, &poker_client::on_bet_value_changed) );
-  bet_value_slider->set_range(0, player->wallet); // set range based on initial player wallet
+  //bet_value_slider->set_range(0, player->wallet); // set range based on initial player wallet
   
   // connect hand buttons
   GET_AND_CONNECT( "hand1", card_buttons[0], &poker_client::on_hand_click_1 )
@@ -154,18 +172,6 @@ int poker_client::run()
     GET_WIDGET(std::string("card") + std::to_string(i+1), cards[i])
     card_buttons[i]->set_sensitive(false);
   }
-  
-  // set default values for player's hand....these will be removed later
-  Card c1{Card_value::TEN, Suit::CLUB};
-  Card c2{Card_value::JACK, Suit::CLUB};
-  Card c3{Card_value::QUEEN, Suit::CLUB};
-  Card c4{Card_value::KING, Suit::CLUB};
-  Card c5{Card_value::ACE, Suit::CLUB};
-  player->hand[0] = c1;
-  player->hand[1] = c2;
-  player->hand[2] = c3;
-  player->hand[3] = c4;
-  player->hand[4] = c5;
   
   // grab labels
   GET_WIDGET("username", username)
@@ -191,7 +197,6 @@ int poker_client::run()
     for(int j = 1; j <= NUM_CARDS; j++)
     {
       GET_WIDGET(player + std::string("card") + std::to_string(j), opp_display->cards[j-1])
-      opp_display->cards[j-1]->set(card_down_file);
     }
       
     // get last action label
@@ -225,6 +230,10 @@ void poker_client::close()
   for(int i = 0; i < MAX_OPPONENTS; i++)
     if(opp_displays[i])
       delete opp_displays[i];
+    
+  for(int i = 0; i < MAX_PLAYERS; i++)
+    if(players[i])
+      delete players[i];
   
   // free memory and return the exit status of the client
   std::cout << std::endl << "Client has been closed." << std::endl;
@@ -256,29 +265,29 @@ void poker_client::update_client(bool showcards)
   for(int i = 0; i < MAX_PLAYERS; i++) // update opponents info
   {
     // update main player's info
-    if(i == comm->main_player)
+    if(i == main_player)
     {
-      Player* player = comm->players[ comm->main_player ];
+      Player* player = players[ main_player ];
       
       username->set_label(player->name); // update username
   
-      for(int i = 0; i < NUM_CARDS; i++) // update cards
+      for(int j = 0; j < NUM_CARDS; j++) // update cards
       {
-        std::string image_file = get_card_file(player->hand[i]);
+        std::string image_file = get_card_file(player->hand[j]);
         // only update image file when needed
-        if(image_file != cards[i]->property_file())
+        if(image_file != cards[j]->property_file())
         {
-          cards[i]->set(image_file);
+          cards[j]->set(image_file);
         }
-        card_buttons[i]->set_sensitive(true);
+        card_buttons[j]->set_sensitive(true);
       } 
     }
     
     // update opponent's info
-    else if(i < comm->num_players)
+    else if(i < num_players)
     {
       auto od = opp_displays[od_index++];
-      Player* opp = comm->players[i];
+      Player* opp = players[i];
 
       od->username->set_label(opp->name);
       
@@ -314,10 +323,10 @@ void poker_client::update_client(bool showcards)
   }
   
   char buffer[50]; // used to format labels...
-  Player* main_player = comm->players[ comm->main_player ];
+  Player* main = players[ main_player ];
   
   // update wallet label
-  sprintf(buffer, wallet_label_format, main_player->wallet);
+  sprintf(buffer, wallet_label_format, main->wallet);
   wallet_label->set_label(buffer);
   
   // update pot label
@@ -328,7 +337,7 @@ void poker_client::update_client(bool showcards)
   sprintf(buffer, current_bet_label_format, comm->current_bet);
   current_bet_label->set_label(buffer);
   
-  bet_value_slider->set_range(comm->current_bet, main_player->wallet);
+  bet_value_slider->set_range(comm->current_bet, main->wallet);
   
   
   // enable check button based on the current bet
@@ -350,7 +359,7 @@ void  poker_client::on_hand_click_##NUM()                       \
   std::cout << "Hand " << NUM << " was clicked!" << std::endl;  \
   if(cards[NUM-1]->property_file() == card_down_file)           \
   {                                                             \
-    Player* player = comm->players[ comm->main_player ];        \
+    Player* player = players[ main_player ];                    \
     Card card = player->hand[NUM-1];                            \
     std::string image = get_card_file(card);                    \
     cards[NUM-1]->set(image);                                   \
