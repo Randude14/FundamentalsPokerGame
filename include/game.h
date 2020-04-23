@@ -34,8 +34,6 @@ class Game
     // out to all players    
     void write_game_state(nlohmann::json& to_player);
     
-  private:
-    friend class Dealer;
     std::vector< Card> deck{ std::vector<Card>( 52, Card())};
     std::vector< Card * > discard_pile;
     double prize_pot;
