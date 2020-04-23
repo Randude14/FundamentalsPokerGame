@@ -104,19 +104,22 @@ void client_communicator::message_readin(std::string message)
   client->update_client();
 }
 
-void client_communicator::send_action(std::string action, int bet)
+void client_communicator::send_action(int cards,
+                                      std::string chat,
+                                      double curr_bet,
+                                      std::string event,
+                                      std::string uuid,
+                                      std::string name,
+                                      double tot_bet)
 {
-  current_bet = bet;
-  
-  //Player* main_player = players[main_player];
-  
   nlohmann::json to_dealer;
-  to_dealer["action"] = action;
-  
-  // this field is important....this tells the dealer who sent this action
-  to_dealer["table_pos"] = 0;//main_player->table_position;
-  
-  to_dealer["current_bet"] = current_bet;
+  to_dealer["cards_requested"] = cards;
+  to_dealer["chat"] = chat;
+  to_dealer["current_bet"] = curr_bet;
+  to_dealer["event"] = event;
+  to_dealer["from"] = { {"uuid",uuid} , {"name",name} };
+  to_dealer["total_bet"] = tot_bet;
+
   std::string t = to_dealer.dump();
   
   chat_message msg;
