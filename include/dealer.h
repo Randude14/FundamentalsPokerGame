@@ -4,6 +4,7 @@
 #include"player.h"
 #include "game.h"
 #include "card.h"
+#include "json.hpp"
 #include <string>
 #include <vector>
 
@@ -28,6 +29,9 @@ class Dealer
     std::vector<Card> shuffle(Game& g);            // Called to shuffle cards between rounds
     void deal(std::vector<Card>& temp,Game& g);               // Called to deal out cards to players
     void determine_winner(Game& g);   // Dealer then needs to determine winner based on the player's hands
+    
+    // called by chat server for the dealer to process an input sent from a client
+    void process(nlohmann::json& to_dealer, nlohmann::json& to_player);
 };
 
 #endif // DEALER_H

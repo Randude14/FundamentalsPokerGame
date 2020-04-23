@@ -45,7 +45,7 @@ return g.deck;
 //and it will update the deck after the function is called
 void Dealer::deal(std::vector<Card>& temp,Game& g)
 {
-	int Noofcards=5,i,j;
+	unsigned Noofcards=5,i,j;
 	for(i=0;i<Noofcards;i++)
 	{
     for(j=0;j<g.players.size();j++)
@@ -79,7 +79,7 @@ void Dealer::determine_winner(Game& g)
 {
 std::vector<int>winner;
 //inputting all the rank of each player in a winner vector
-int i;
+unsigned i;
 for(i=0;i<g.players.size();i++)
 {
   winner.push_back((int)g.players[i].hand_ranking);
@@ -99,11 +99,10 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
 {
   std::string action = to_dealer["action"];
   std::cout << "Player invoked " << action << std::endl;
-
-  current_bet = to_dealer["current_bet"];
-
-  to_player["current_bet"] = current_bet;
+  
+  // process player input
+  to_player["main_player"] = 0;
+  to_player["num_players"] = 0;
   
   game->write_game_state( to_player );
-}
 }
