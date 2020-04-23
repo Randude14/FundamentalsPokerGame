@@ -43,7 +43,7 @@ void Dealer::deal(std::vector<Card>& deck)
 	unsigned j;
 	for(i = 0 ; i < Noofcards; i++)
 	{
-    for(j = 0 ; j < game.players.size(); j++)
+    for(j = 0 ; j < sizeof(game.players); j++)
     {
       // player gets top of deck, then remove the top card
       game.players[j].hand[i] = deck[0];
@@ -73,13 +73,13 @@ void Dealer::exchange(std::vector<Card>& deck, Player& p)
 }
 void Dealer::determine_winner()
 {
-  assert(game.players.size() >= 2);
+  assert(sizeof(game.players) >= 2);
   
   //inputting all the rank of each player in a winner vector
   unsigned int i;
   Player winner = game.players[0];
   
-  for(i=1; i < game.players.size(); i++)
+  for(i=1; i < sizeof(game.players); i++)
   {
     // player @ i has a better hand than current winner
     if(winner.compare_hands(game.players[i]) < 0)
