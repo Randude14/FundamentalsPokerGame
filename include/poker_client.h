@@ -51,6 +51,9 @@ class poker_client
     
     void close(); // called when client window closes
     void connection_failed();
+    
+    int num_players;
+    int main_player;
 	
   protected:
   
@@ -104,14 +107,17 @@ class poker_client
     Gtk::Label *turn_status;
     
     // formats for the pot and current_labels
-    const char* pot_label_format = "Pot: %ld";
-    const char* current_bet_label_format = "Current Bet: %ld";
-    const char* wallet_label_format = "Wallet: %ld";
+    const char* pot_label_format = "Pot: %.0f";
+    const char* current_bet_label_format = "Current Bet: %.0f";
+    const char* wallet_label_format = "Wallet: %.0f";
     
     // pot and current_bet labels
     Gtk::Label *pot_label;
     Gtk::Label *current_bet_label;
     Gtk::Label *wallet_label;
+    
+    // player list
+    std::vector<Player*> players;
     
     Gtk::Button *card_buttons[NUM_CARDS]; // buttons for the player cards
     Gtk::Image *cards[NUM_CARDS];         // images for the player cards

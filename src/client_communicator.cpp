@@ -6,12 +6,6 @@
 client_communicator::client_communicator(poker_client* c, 
   std::string host, std::string port) : client{c}
 {
-  for(int i = 0; i < MAX_PLAYERS; i++)
-    players[i] = new Player();
-  
-  main_player = 0;
-  num_players = 1;
-  
   failed = false;
   comm_t = new std::thread( &client_communicator::asio_run , this, host, port );
 }
@@ -26,7 +20,7 @@ void client_communicator::close()
   {
     try
     {
-      // don't close io_conext if connection failed
+      // don't close io_context if connection failed
       comm->close();
       comm_t->join();
     }
@@ -39,15 +33,6 @@ void client_communicator::close()
     delete comm_t;
     comm = nullptr;
     comm_t = nullptr;
-  }
-  
-  for(int i = 0; i < MAX_PLAYERS; i++)
-  {
-    if(players[i] != nullptr)
-    {
-      delete players[i];
-      players[i] = nullptr;
-    }
   }
 }
 

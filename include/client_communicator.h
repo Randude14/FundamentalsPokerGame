@@ -11,6 +11,7 @@
 
 #include <cstdlib>
 #include <deque>
+#include <vector>
 #include <iostream>
 #include <thread>
 #include "asio.hpp"
@@ -41,9 +42,6 @@ class client_communicator
     void send_message();
   
   private:
-    Player* players[MAX_PLAYERS];      // keep track of player info
-    int num_players;
-    int main_player;                   // index of the player this client is tied to
     
     std::string turn_status;           // message indicating who the dealer is waiting on
     long pot;                          // current pot of the game

@@ -46,4 +46,6 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   current_bet = to_dealer["current_bet"];
   
   to_player["current_bet"] = current_bet;
+  
+  game->write_game_state( to_player );
 }

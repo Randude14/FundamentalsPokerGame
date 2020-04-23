@@ -3,6 +3,7 @@
 
 #include "player.h"
 #include "card.h"
+#include "json.hpp"
 #include <string>
 #include <vector>
 
@@ -28,6 +29,11 @@ class Game
                                         //                     (2) Exchange cards ->
                                         //                     (3) Betting round 2 ->
                                         //                     (4) End
+                                        
+    // used to write the game state to the json that goes
+    // out to all players    
+    void write_game_state(nlohmann::json& to_player);
+    
   private:
     std::vector< Card * > deck;
     std::vector< Card * > discard_pile;
