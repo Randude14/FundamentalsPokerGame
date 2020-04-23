@@ -45,7 +45,8 @@ return g.deck;
 //and it will update the deck after the function is called
 void Dealer::deal(std::vector<Card>& temp,Game& g)
 {
-	unsigned Noofcards=5,i,j;
+	int Noofcards=5, i;
+	unsigned j;
 	for(i=0;i<Noofcards;i++)
 	{
     for(j=0;j<g.players.size();j++)
@@ -94,6 +95,8 @@ std::cout<<"Player: "<<i+1<<" is the winner"<<std::endl;
 }
 }
 }
+
+int current_bet = 0;
 
 void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
 {

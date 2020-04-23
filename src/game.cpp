@@ -36,10 +36,10 @@ Game::~Game() { }
 
 void Game::player_join(Player player)
 {
-  int playersNo; //I have already described it in Game class, don't know why it asked me to initialized here
-std::vector<Player>players;
-players.push_back(player);
-playersNo++;
+  //  int playersNo; //I have already described it in Game class, don't know why it asked me to initialized here
+  std::vector<Player>players;
+  players.push_back(player);
+  playersNo++;
 }
 
 void Game::check()
