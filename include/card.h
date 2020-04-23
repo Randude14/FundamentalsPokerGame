@@ -3,7 +3,7 @@
 
 #include <string>
 
-/* 
+/*
  * Acts as the cards the game will deal out and handle
  */
 
@@ -25,6 +25,8 @@ enum class Card_value
   KING =    13,
   ACE =     14,   // make ace highest card...only the five high straight is the only case for it being 1
 };
+//++operator overloaded for iteration
+inline Card_value operator++( Card_value& x ) { return x = (Card_value)(((int)(x) + 1)); }
 
 // Suit values assigned
 enum class Suit
@@ -34,7 +36,7 @@ enum class Suit
   DIAMOND,
   CLUB,
 };
-
+inline Suit operator++( Suit& x ) { return x = (Suit)(((int)(x) + 1)); }
 
 // hand rankings for the player's hands
 enum class Hand_rankings
@@ -60,11 +62,11 @@ class Card
   public:
     Card(Card_value value=Card_value::ACE, Suit suit=Suit::HEART);
     virtual ~Card();
-    
+
     // used to get the int value from the enums
     int get_int_value();
     int get_int_suit();
-    
+
     Card_value value;
     Suit suit;
 };

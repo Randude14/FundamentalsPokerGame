@@ -10,8 +10,8 @@
 /*
  * Game class to maintain game state
  */
- 
-class Player;
+
+ class Player;
 
 class Game
 {
@@ -35,14 +35,15 @@ class Game
     void write_game_state(nlohmann::json& to_player);
     
   private:
-    std::vector< Card * > deck;
+    std::vector< Card> deck{ std::vector<Card>( 52, Card())};
     std::vector< Card * > discard_pile;
     double prize_pot;
     double current_bet;
-    std::vector< Player * > players;
+    std::vector< Player> players;
     int current_turn;
     int game_stage;
     bool bets_agree;
+    int playersNo;
 };
 
 #endif // GAME_H
