@@ -109,4 +109,4 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   
   game->write_game_state( to_player );
 }
-}
+
