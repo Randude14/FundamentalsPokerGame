@@ -34,35 +34,35 @@ Game::~Game() { }
 // M E T H O D S
 // /////////////
 
-void player_join(Player player)
+void Game::player_join(Player player)
 {
-  int playersNo; //I have already described it in Game class, don't know why it asked me to initialized here
-std::vector<Player>players;
-players.push_back(player);
-playersNo++;
+  //  int playersNo; //I have already described it in Game class, don't know why it asked me to initialized here
+  std::vector<Player>players;
+  players.push_back(player);
+  playersNo++;
 }
 
-void check()
-{
-
-}
-
-void bet(double amount)
+void Game::check()
 {
 
 }
 
-void call(double amount)
+void Game::bet(double amount)
 {
 
 }
 
-void raise(double amount)
+void Game::call(double amount)
 {
 
 }
 
-void fold()
+void Game::raise(double amount)
+{
+
+}
+
+void Game::fold()
 {
 
 }
