@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
 
     // only need one server
     asio::io_context io_context;
-    tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[1]));
+    tcp::endpoint endpoint(tcp::v4(), std::atoi("9000"));
     
     chat_server server( io_context, endpoint, dealer );
     std::cout << "Dealer started." << std::endl;

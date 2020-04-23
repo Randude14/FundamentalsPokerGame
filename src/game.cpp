@@ -1,5 +1,6 @@
 #include "player.h"
 #include "card.h"
+#include "game.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -7,14 +8,13 @@
 // ///////////////////////////////////////////////
 // C O N S T R U C T O R S / D E S T R U C T O R S
 // ///////////////////////////////////////////////
-class Game;
-Game::Game(std::string name)
+
+Game::Game()
 {
   prize_pot = 0.0;
   current_bet = 1.0;
   game_stage = 0;
   playersNo=0;
-  std::vector<Player>players;
   int i;
   	Suit S;
   	Card_value V;
@@ -26,6 +26,19 @@ Game::Game(std::string name)
   			i++;
   			}
 
+  Player player;
+  player.name = "Randall";
+  player.wallet = 50;
+  
+  player.hand.push_back(Card(Card_value::TWO   , Suit::HEART));
+  player.hand.push_back(Card(Card_value::THREE , Suit::HEART));
+  player.hand.push_back(Card(Card_value::FOUR  , Suit::HEART));
+  player.hand.push_back(Card(Card_value::SIX   , Suit::HEART));
+  player.hand.push_back(Card(Card_value::FIVE  , Suit::HEART));
+  
+  player.calculate_handvalue();
+  
+  players[0] = player;
 }
 
 Game::~Game() { }
@@ -74,15 +87,17 @@ void Game::next_stage()
 
 void Game::write_game_state(nlohmann::json& to_player)
 {
+  Player p = players[0];
   // write player total
-  to_player["player_total"] = players.size();
+  to_player["player_total"] = 1;
   
   // add player info to json
-  for(unsigned int i = 0; i < players.size(); i++)
+  for(unsigned int i = 0; i < 1; i++)
   {
-    Player player = players.at(i);
+    std::cout << "index " << i << std::endl;
+    Player player = players[i];
     to_player["players"][i]["name"] = player.name;
-    //to_player["players"][i]["uuid"] = player->UUID;
+    to_player["players"][i]["uuid"] = boost::lexical_cast<std::string>(player.UUID);
     to_player["players"][i]["wallet"] = player.wallet;
     to_player["players"][i]["bet_amount"] = player.bet_amount;
     to_player["players"][i]["has_bet"] = player.has_bet;
@@ -92,7 +107,7 @@ void Game::write_game_state(nlohmann::json& to_player)
     {
       std::string hand_string = std::to_string( static_cast<int>(player.hand[j].suit) );
       hand_string += std::string(" ");
-      hand_string += std::to_string(static_cast<int>(player.hand[j].suit));
+      hand_string += std::to_string(static_cast<int>(player.hand[j].value));
       to_player["players"][i]["cards"][j] = hand_string;
     }
   }

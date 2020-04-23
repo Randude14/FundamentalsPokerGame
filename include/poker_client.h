@@ -18,6 +18,7 @@
  */
  
  
+#define MAX_PLAYERS 5
 #define MAX_OPPONENTS MAX_PLAYERS-1
 
 class client_communicator;
@@ -51,6 +52,9 @@ class poker_client
     
     void close(); // called when client window closes
     void connection_failed();
+    
+    // player list
+    Player* players[MAX_PLAYERS];
     
     int num_players;
     int main_player;
@@ -115,9 +119,6 @@ class poker_client
     Gtk::Label *pot_label;
     Gtk::Label *current_bet_label;
     Gtk::Label *wallet_label;
-    
-    // player list
-    std::vector<Player*> players;
     
     Gtk::Button *card_buttons[NUM_CARDS]; // buttons for the player cards
     Gtk::Image *cards[NUM_CARDS];         // images for the player cards

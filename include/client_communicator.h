@@ -17,6 +17,7 @@
 #include "asio.hpp"
 #include "chat_message.hpp"
 
+#include <boost/uuid/uuid.hpp>
 #include "json.hpp"
 
 

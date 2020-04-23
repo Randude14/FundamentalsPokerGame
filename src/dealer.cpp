@@ -17,7 +17,7 @@
 
 Dealer::Dealer()
 {
-
+  
 }
 
 Dealer::~Dealer() { }
@@ -25,75 +25,71 @@ Dealer::~Dealer() { }
 // /////////////
 // M E T H O D S
 // /////////////
-//This functions returns a shuffled deck of 52 cards
-template<typename T>
-void pop_front(std::vector<T> &v)
-{
-    if (v.size() > 0) {
-        v.erase(v.begin());
-    }
-}
 
-std::vector<Card> Dealer::shuffle(Game& g)
+void Dealer::shuffle()
 {
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-  std::shuffle (g.deck.begin(), g.deck.end(), std::default_random_engine(seed));
-return g.deck;
+  std::shuffle (game.deck.begin(), game.deck.end(), std::default_random_engine(seed));
 }
+
 //This function takes the shuffled deck as a parameter which it uses to deal the card to the player
 //and it will update the deck after the function is called
-void Dealer::deal(std::vector<Card>& temp,Game& g)
+void Dealer::deal(std::vector<Card>& deck)
 {
+  assert(deck.size() == 52);
+  
 	int Noofcards=5, i;
 	unsigned j;
-	for(i=0;i<Noofcards;i++)
+	for(i = 0 ; i < Noofcards; i++)
 	{
-    for(j=0;j<g.players.size();j++)
+    for(j = 0 ; j < game.players.size(); j++)
     {
-      g.players[j].hand[i]=temp[0];
-      pop_front(temp);
+      // player gets top of deck, then remove the top card
+      game.players[j].hand[i] = deck[0];
+      deck.erase( deck.begin() );
     }
 	}
 }
 
 void Dealer::exchange(std::vector<Card>& deck, Player& p)
 {
-int x,y;
-//Should be the message box in GTK
-std::cout<<"How many card you want to exchange?(limit is 3)"<<std::endl;
-//Should take the input from GTK
-std::cin>>x;
-for(int i=0;i<x;i++)
-{
-std::cout<<"Enter the card no. you would like to exchange"<<std::endl;
-std::cin>>y;
-//hand.erase(std::find(hand.begin(),hand.end(),y-1));
-p.hand[y-1]=deck[0]; //gets the first card from the Deck
-                   /*we don't need the discard pile because the card in the hands
-                   are already been popped out from the deck so while exchanging they
-                   will never get the card that has already been served*/
-        pop_front(deck);
+  int x,y;
+  //Should be the message box in GTK
+  std::cout<<"How many card you want to exchange?(limit is 3)"<<std::endl;
+  //Should take the input from GTK
+  std::cin>>x;
+  for(int i=0;i<x;i++)
+  {
+    std::cout << "Enter the card no. you would like to exchange"<<std::endl;
+    std::cin >> y;
+    //hand.erase(std::find(hand.begin(),hand.end(),y-1));
+    p.hand[y-1]=deck[0]; //gets the first card from the Deck
+                      /*we don't need the discard pile because the card in the hands
+                      are already been popped out from the deck so while exchanging they
+                      will never get the card that has already been served*/
+    deck.erase( deck.begin() );
+  }
 }
-}
-void Dealer::determine_winner(Game& g)
+void Dealer::determine_winner()
 {
-std::vector<int>winner;
-//inputting all the rank of each player in a winner vector
-unsigned i;
-for(i=0;i<g.players.size();i++)
-{
-  winner.push_back((int)g.players[i].hand_ranking);
-}
- std::sort(winner.begin(), winner.end());
-//winner[playersNo] will hold the highest rank
-for(i=0;i<g.players.size();i++)
-{
-if(winner[g.playersNo]==(int)g.players[i].hand_ranking)
-{
-std::cout<<"Player: "<<i+1<<" is the winner"<<std::endl;
-}
-}
+  assert(game.players.size() >= 2);
+  
+  //inputting all the rank of each player in a winner vector
+  unsigned int i;
+  Player winner = game.players[0];
+  
+  for(i=1; i < game.players.size(); i++)
+  {
+    // player @ i has a better hand than current winner
+    if(winner.compare_hands(game.players[i]) < 0)
+    {
+      winner = game.players[i];
+    }
+  }
+  
+  //winner[playersNo] will hold the highest rank
+  std::cout << winner.name <<" is the winner" << std::endl;
 }
 
 int current_bet = 0;
@@ -103,9 +99,5 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   std::string action = to_dealer["action"];
   std::cout << "Player invoked " << action << std::endl;
   
-  // process player input
-  to_player["main_player"] = 0;
-  to_player["num_players"] = 0;
-  
-  game->write_game_state( to_player );
+  game.write_game_state( to_player );
 }

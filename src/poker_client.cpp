@@ -127,12 +127,14 @@ int poker_client::run()
   
   // get main player
   for(int i = 0; i < MAX_PLAYERS; i++)
-    players.push_back( new Player() );
+  {
+    players[i] = new Player();
+  }
   
   num_players = 1;
   main_player = 0;
   
-  Player* player = players[main_player];
+  Player* player = players[0];
   player->name = playername;
   player->wallet = 100;
   // set default values for player's hand....these will be removed later

@@ -1,6 +1,8 @@
 #ifndef CARD_H
 #define CARD_H
 
+#pragma once
+
 #include <string>
 
 /*
@@ -61,6 +63,8 @@ class Card
 {
   public:
     Card(Card_value value=Card_value::ACE, Suit suit=Suit::HEART);
+    Card(const Card& other);
+    void operator=(const Card& other);
     virtual ~Card();
 
     // used to get the int value from the enums

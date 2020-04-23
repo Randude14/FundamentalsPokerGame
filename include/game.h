@@ -1,6 +1,10 @@
 #ifndef GAME_H
 #define GAME_H
 
+#pragma once
+
+#include <boost/uuid/uuid.hpp>
+#include <boost/lexical_cast.hpp>
 #include "player.h"
 #include "card.h"
 #include "json.hpp"
@@ -11,12 +15,12 @@
  * Game class to maintain game state
  */
 
- class Player;
+class Player;
 
 class Game
 {
   public:
-    Game(std::string name);
+    Game();
     virtual ~Game();
     void player_join(Player player);    // Called when each player joins the game
     void check();                       // Called when a player chooses to check (no bet)
@@ -38,7 +42,7 @@ class Game
     std::vector< Card * > discard_pile;
     double prize_pot;
     double current_bet;
-    std::vector< Player> players;
+    Player players[5];
     int current_turn;
     int game_stage;
     bool bets_agree;

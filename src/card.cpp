@@ -1,10 +1,23 @@
 #include "card.h"
+#include <iostream>
 
 // ///////////////////////////////////////////////
 // C O N S T R U C T O R S / D E S T R U C T O R S
 // ///////////////////////////////////////////////
 
 Card::Card(Card_value v, Suit s) : value{v}, suit{s}  { }
+
+Card::Card(const Card& other) 
+{ 
+  this->value = other.value;
+  this->suit = other.suit;
+}
+
+void Card::operator=(const Card& other) 
+{ 
+  this->value = other.value;
+  this->suit = other.suit;
+}
 
 Card::~Card() { }
 

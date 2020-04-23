@@ -1,14 +1,16 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#pragma once
+
 #include "card.h"
-#include "dealer.h"
+#include "json.hpp"
 #include <string>
 #include <vector>
-#include <map>/*
+#include <map>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>*/
+#include <boost/uuid/uuid_io.hpp>
 
 /*
  * Player class which contains the data of a player in the game
@@ -21,13 +23,15 @@
 class Player
 {
   public:
-    Player();             // Set player defaults
+    Player();                     // Set player defaults
+    Player(const Player& other); // Copy constructor
+    void operator=(const Player& other);
     virtual ~Player();
 
     void calculate_handvalue();  // calculate the player's hand value
 
     // Player attributes
-    //boost::uuids::uuid UUID;
+    boost::uuids::uuid UUID;
     int table_position;
     std::string name;
     double wallet;

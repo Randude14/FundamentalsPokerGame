@@ -1,4 +1,5 @@
 #include "client_communicator.h"
+#include <boost/lexical_cast.hpp>
 
 #include <stdlib.h>
 #include <chrono>
@@ -62,7 +63,43 @@ void client_communicator::message_readin(std::string message)
 {
   nlohmann::json to_player = nlohmann::json::parse( message );
   
-  current_bet = to_player["current_bet"];
+  client->num_players = to_player["player_total"];
+  auto players = client->players;
+  
+  for(int i = 0; i < client->num_players; i++)
+  {
+    Player* player = players[i];
+    player->name =   to_player["players"][i]["name"];
+    std::string uuid_string = to_player["players"][i]["uuid"];
+    player->UUID =   boost::lexical_cast<boost::uuids::uuid>(uuid_string);
+    player->wallet = to_player["players"][i]["wallet"];
+    player->name =   to_player["players"][i]["name"];
+    player->bet_amount =   to_player["players"][i]["bet_amount"];
+    player->has_bet =      to_player["players"][i]["has_bet"];
+    
+    for(int j = 0; j < NUM_CARDS; j++)
+    {
+      std::string hand_string = to_player["players"][i]["cards"][j];
+      unsigned int index = hand_string.find(' ');
+      assert(index != std::string::npos);
+      
+      try 
+      {
+        // read in the card....suit and value are split by a string
+        int suit_t = std::stoi( hand_string.substr(0, index) );
+        int value_t = std::stoi( hand_string.substr(index+1) );
+        auto suit = static_cast<Suit>(suit_t);
+        auto value = static_cast<Card_value>(value_t);
+        
+        player->hand[j].suit =  suit;
+        player->hand[j].value = value;
+      }
+      catch(std::exception& ex)
+      {
+        std::cout << "Error processing: " << hand_string << std::endl;
+      }
+    }
+  }
   
   client->update_client();
 }

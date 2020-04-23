@@ -7,7 +7,7 @@
 
 Player::Player()
 {
-  //UUID = boost::uuids::random_generator()();
+  UUID = boost::uuids::random_generator()();
   wallet = 100.0;
   bet_amount = 0.0;
   name = "unknown";
@@ -15,10 +15,36 @@ Player::Player()
   has_bet = false;
 }
 
-Player::~Player()
+Player::Player(const Player& other)
 {
-	
+  this->wallet = other.wallet;
+  this->bet_amount = other.bet_amount;
+  this->name = other.name;
+  this->has_bet = other.has_bet;
+  this->table_position = other.table_position;
+  this->hand_ranking = other.hand_ranking;
+  for(unsigned int i = 0; i < other.hand.size(); i++)
+  {
+    this->hand.push_back(other.hand[i]);
+  }
 }
+
+void Player::operator=(const Player& other)
+{
+  this->wallet = other.wallet;
+  this->bet_amount = other.bet_amount;
+  this->name = other.name;
+  this->has_bet = other.has_bet;
+  this->table_position = other.table_position;
+  this->hand_ranking = other.hand_ranking;
+  this->hand.clear();
+  for(unsigned int i = 0; i < NUM_CARDS; i++)
+  {
+    this->hand.push_back(other.hand[i]);
+  }
+}
+
+Player::~Player() { }
 
 
 int Player::compare_hands(Player& other)
@@ -40,7 +66,6 @@ int Player::compare_hands(Player& other)
   
   return 0;
 }
-
 
 
 // this map counts the number of cards per value
