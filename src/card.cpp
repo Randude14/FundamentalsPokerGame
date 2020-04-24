@@ -13,10 +13,11 @@ Card::Card(const Card& other)
   this->suit = other.suit;
 }
 
-void Card::operator=(const Card& other) 
+Card& Card::operator=(const Card& other) 
 { 
   this->value = other.value;
   this->suit = other.suit;
+  return *this;
 }
 
 Card::~Card() { }

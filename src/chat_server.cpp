@@ -17,6 +17,7 @@
 #include <memory>
 #include <set>
 #include <utility>
+#include <thread>
 #include "asio.hpp"
 #include "json.hpp"
 #include "chat_message.hpp"
@@ -134,7 +135,7 @@ private:
         {
           if (!ec)
           {
-        
+            mut.lock();
             nlohmann::json to_dealer = nlohmann::json::parse(std::string(read_msg_.body()));
             nlohmann::json to_player;  // represents the entire game state.  sent to all players
             /*
@@ -172,6 +173,7 @@ private:
 	            sending.encode_header();
                room_.deliver(sending);
             }
+            mut.unlock();
             do_read_header();
           }
           else
@@ -209,6 +211,7 @@ private:
   Dealer* dealer;
   chat_message read_msg_;
   chat_message_queue write_msgs_;
+  std::mutex mut;
 };
 
 //----------------------------------------------------------------------

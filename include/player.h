@@ -25,10 +25,8 @@ class Player
   public:
     Player();                     // Set player defaults
     Player(const Player& other); // Copy constructor
-    void operator=(const Player& other);
+    Player& operator=(const Player& other);
     virtual ~Player();
-
-    void calculate_handvalue();  // calculate the player's hand value
 
     // Player attributes
     boost::uuids::uuid UUID;
@@ -38,11 +36,9 @@ class Player
     std::vector<Card> hand;
     double bet_amount;
     bool has_bet;
+    bool folded;
     
     Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};
-    
-    // -1 if other player has a better hand, 1 if this player has the better hand and 0 for tie
-    int compare_hands(Player& other);     
 };
 
 #endif // PLAYER_H

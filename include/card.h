@@ -64,7 +64,7 @@ class Card
   public:
     Card(Card_value value=Card_value::ACE, Suit suit=Suit::HEART);
     Card(const Card& other);
-    void operator=(const Card& other);
+    Card& operator=(const Card& other);
     virtual ~Card();
 
     // used to get the int value from the enums

@@ -16,10 +16,6 @@
  /*
  * Macros for application metadata
  */
- 
- 
-#define MAX_PLAYERS 5
-#define MAX_OPPONENTS MAX_PLAYERS-1
 
 class client_communicator;
  

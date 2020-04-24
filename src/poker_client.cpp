@@ -6,6 +6,7 @@
 #include "play_window.h"
 #include "player.h"
 #include "card.h"
+#include "game.h"
 
 
 
