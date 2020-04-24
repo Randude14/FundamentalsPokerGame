@@ -40,6 +40,8 @@ class Player
     int get_numDiscards();
     Hand_rankings get_hand_ranking();
     std::vector<Card>& get_hand();
+    Card get_card(int);
+    bool get_bet_status();
     
     // Setters
     void set_UUID(std::string);
@@ -52,9 +54,11 @@ class Player
     void set_numDiscards(int);
     void set_folded(bool);
     void set_hand_ranking(Hand_rankings);
-    void set_hand( std::vector<Card>);
+    void set_hand(std::vector<Card>);
+    void add_to_hand(Card);
     void draw_card(Card);
     void calculate_handvalue();  // calculate the player's hand value
+    void set_bet_status(bool);
 
   private:
     // Player attributes
@@ -69,6 +73,7 @@ class Player
     std::string action;
     std::string message;
     int numDiscards;
+    bool has_bet;
     
     // -1 if other player has a better hand, 1 if this player has the better hand and 0 for tie
     int compare_hands(Player& other);

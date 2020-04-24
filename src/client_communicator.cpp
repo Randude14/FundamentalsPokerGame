@@ -69,13 +69,13 @@ void client_communicator::message_readin(std::string message)
   for(int i = 0; i < client->num_players; i++)
   {
     Player* player = players[i];
-    player->name =   to_player["players"][i]["name"];
+    player->set_name(to_player["players"][i]["name"]);
     std::string uuid_string = to_player["players"][i]["uuid"];
-    player->UUID =   boost::lexical_cast<boost::uuids::uuid>(uuid_string);
-    player->wallet = to_player["players"][i]["wallet"];
-    player->name =   to_player["players"][i]["name"];
-    player->bet_amount =   to_player["players"][i]["bet_amount"];
-    player->has_bet =      to_player["players"][i]["has_bet"];
+    player->set_UUID(uuid_string);
+    player->set_wallet(to_player["players"][i]["wallet"]);
+    player->set_name(to_player["players"][i]["name"]);
+    player->set_total_bet(to_player["players"][i]["bet_amount"]);
+    player->set_bet_status(to_player["players"][i]["has_bet"]);
     
     for(int j = 0; j < NUM_CARDS; j++)
     {
@@ -90,9 +90,8 @@ void client_communicator::message_readin(std::string message)
         int value_t = std::stoi( hand_string.substr(index+1) );
         auto suit = static_cast<Suit>(suit_t);
         auto value = static_cast<Card_value>(value_t);
-        
-        player->hand[j].suit =  suit;
-        player->hand[j].value = value;
+        Card card(value, suit);
+        player->add_to_hand(card);
       }
       catch(std::exception& ex)
       {

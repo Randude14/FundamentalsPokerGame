@@ -125,11 +125,17 @@ std::vector<Card>& Player::get_hand()
   return hand;
 }
 
+Card Player::get_card(int index)
+{
+  return hand[index];
+}
+
 void Player::draw_card(Card card)
 {
   hand.push_back(card);
   assert(hand.size() <= NUM_CARDS);
 }
+
 
 // Setters
 void Player::set_UUID(std::string uuid)
@@ -186,6 +192,16 @@ void Player::set_hand(std::vector<Card> h)
 {
   hand.clear();
   hand.insert(hand.end(), h.begin(), h.end());
+}
+
+void Player::add_to_hand(Card c)
+{
+  hand.push_back(c);
+}
+
+void Player::set_bet_status(bool status)
+{
+  has_bet = status;
 }
 
 Player::~Player() { }

@@ -138,19 +138,19 @@ int poker_client::run()
   main_player = 0;
   
   Player* player = players[0];
-  player->name = playername;
-  player->wallet = 100;
+  player->set_name(playername);
+  player->set_wallet(100);
   // set default values for player's hand....these will be removed later
   Card c1{Card_value::TEN, Suit::CLUB};
   Card c2{Card_value::JACK, Suit::CLUB};
   Card c3{Card_value::QUEEN, Suit::CLUB};
   Card c4{Card_value::KING, Suit::CLUB};
   Card c5{Card_value::ACE, Suit::CLUB};
-  player->hand.push_back(c1);
-  player->hand.push_back(c2);
-  player->hand.push_back(c3);
-  player->hand.push_back(c4);
-  player->hand.push_back(c5);
+  player->add_to_hand(c1);
+  player->add_to_hand(c2);
+  player->add_to_hand(c3);
+  player->add_to_hand(c4);
+  player->add_to_hand(c5);
    
   // connect poker_client control buttons
   GET_AND_CONNECT( "check",     check_button,   &poker_client::on_check_click )
@@ -276,11 +276,11 @@ void poker_client::update_client(bool showcards)
     {
       Player* player = players[ main_player ];
       
-      username->set_label(player->name); // update username
+      username->set_label(player->get_name()); // update username
   
       for(int j = 0; j < NUM_CARDS; j++) // update cards
       {
-        std::string image_file = get_card_file(player->hand[j]);
+        std::string image_file = get_card_file(player->get_card(j));
         // only update image file when needed
         if(image_file != cards[j]->property_file())
         {
@@ -296,13 +296,13 @@ void poker_client::update_client(bool showcards)
       auto od = opp_displays[od_index++];
       Player* opp = players[i];
 
-      od->username->set_label(opp->name);
+      od->username->set_label(opp->get_name());
       
       
       
       for(int j = 0; j < NUM_CARDS; j++) // update cards
       {
-        std::string image_file = (showcards) ? get_card_file(opp->hand[j]) : card_down_file;
+        std::string image_file = (showcards) ? get_card_file(opp->get_card(j)) : card_down_file;
         if(image_file != od->cards[j]->property_file())
         {
           od->cards[j]->set(image_file);
@@ -333,7 +333,7 @@ void poker_client::update_client(bool showcards)
   Player* main = players[ main_player ];
   
   // update wallet label
-  sprintf(buffer, wallet_label_format, main->wallet);
+  sprintf(buffer, wallet_label_format, main->get_wallet());
   wallet_label->set_label(buffer);
   
   // update pot label
@@ -344,7 +344,7 @@ void poker_client::update_client(bool showcards)
   sprintf(buffer, current_bet_label_format, comm->current_bet);
   current_bet_label->set_label(buffer);
   
-  bet_value_slider->set_range(comm->current_bet, main->wallet);
+  bet_value_slider->set_range(comm->current_bet, main->get_wallet());
   
   
   // enable check button based on the current bet
@@ -367,7 +367,7 @@ void  poker_client::on_hand_click_##NUM()                       \
   if(cards[NUM-1]->property_file() == card_down_file)           \
   {                                                             \
     Player* player = players[ main_player ];                    \
-    Card card = player->hand[NUM-1];                            \
+    Card card = player->get_card(NUM-1);                        \
     std::string image = get_card_file(card);                    \
     cards[NUM-1]->set(image);                                   \
   }                                                             \
