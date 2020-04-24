@@ -183,6 +183,16 @@ void Player::set_numDiscards(int cards)
   numDiscards = cards;
 }
 
+void Player::incr_numDiscards()
+{
+  numDiscards++;
+}
+
+void Player::decr_numDiscards()
+{
+  numDiscards--;
+}
+
 void Player::set_hand_ranking(Hand_rankings r)
 {
   hand_ranking = r;

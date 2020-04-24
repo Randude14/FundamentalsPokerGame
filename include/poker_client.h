@@ -87,10 +87,11 @@ class poker_client
     void on_hand_click_2();
     void on_hand_click_3();
     void on_hand_click_4();
-    void on_hand_click_5();  
+    void on_hand_click_5();
     
     // End callbacks
     
+    void make_json(Player*);
     const std::string facedown = "cards/card_down.png";
     
   private:

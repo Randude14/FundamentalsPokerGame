@@ -52,6 +52,8 @@ class Player
     void set_total_bet(double);
     void set_wallet(double);
     void set_numDiscards(int);
+    void incr_numDiscards();
+    void decr_numDiscards();
     void set_folded(bool);
     void set_hand_ranking(Hand_rankings);
     void set_hand(std::vector<Card>);

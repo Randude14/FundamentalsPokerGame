@@ -370,12 +370,15 @@ void  poker_client::on_hand_click_##NUM()                       \
     Card card = player->get_card(NUM-1);                        \
     std::string image = get_card_file(card);                    \
     cards[NUM-1]->set(image);                                   \
+    player->incr_numDiscards();                                 \
   }                                                             \
   else                                                          \
   {                                                             \
+    Player* player = players[ main_player ];                    \
     cards[NUM-1]->set(card_down_file);                          \
+    player->decr_numDiscards();                                 \
   }                                                             \
-}              
+}
 
 HAND_CLICK_METHODS(1)
 HAND_CLICK_METHODS(2)
@@ -396,31 +399,63 @@ void poker_client::on_check_click()
 {
   // can't check if there is a bet
   //assert( comm->current_bet <= 0 );
-  //comm->send_action("check");
+  Player* player = players[ main_player ];
+  player->set_numDiscards(0);
+  player->set_message("Check!");
+  player->set_current_bet(0.0);
+  player->set_action("check");
+  player->set_total_bet(0.0);
+  make_json(player);
 }
 
 void poker_client::on_bet_click()
 {
   // bet current amount
-  int bet = bet_value_slider->get_value();
   //assert(bet >= comm->current_bet);
-  
-  // internally this is a call rather than a bet
-  //comm->send_action("bet", bet); 
+  Player* player = players[ main_player ];
+  player->set_message("I bet !");
+  player->set_current_bet(bet_value_slider->get_value() - player->get_total_bet());
+  player->set_action("bet");
+  player->set_total_bet(bet_value_slider->get_value());
+  make_json(player);
 }
 
 void poker_client::on_call_click()
 {
-  // set bet value slider to current bet
-  //comm->send_action("call", comm->current_bet );
+  // set total bet to bet value slider
+  Player* player = players[ main_player ];
+  player->set_message("I'll call!");
+  player->set_current_bet(bet_value_slider->get_value() - player->get_total_bet());
+  player->set_action("call");
+  player->set_total_bet(bet_value_slider->get_value());
+  make_json(player);
 }
 
 void poker_client::on_fold_click()
 {
-  //comm->send_action("fold");
+  Player* player = players[ main_player ];
+  player->set_numDiscards(5);
+  player->set_message("I'm out!");
+  player->set_action("fold");
+  player->set_folded(true);
+  make_json(player);
 }
 
 void poker_client::on_discard_click()
 {
-  //comm->send_action("discard");
+  Player* player = players[ main_player ];
+  player->set_message("Give me x cards");
+  player->set_action("exchange");
+  make_json(player);
+}
+
+void poker_client::make_json(Player* player)
+{
+  comm->send_action(player->get_numDiscards(),
+                    player->get_message(),
+                    player->get_current_bet(),
+                    player->get_action(),
+                    player->get_UUID(),
+                    player->get_name(),
+                    player->get_total_bet());
 }
