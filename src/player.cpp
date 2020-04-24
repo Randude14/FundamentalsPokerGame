@@ -136,6 +136,11 @@ void Player::draw_card(Card card)
   assert(hand.size() <= NUM_CARDS);
 }
 
+void Player::clear_hand()
+{
+  hand.clear();
+}
+
 
 // Setters
 void Player::set_UUID(std::string uuid)

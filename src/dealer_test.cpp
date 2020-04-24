@@ -50,57 +50,57 @@ int main(int argc, char* argv[])
   game.player_join(player3);
   game.player_join(player4);
   
-  if(game.min_players())
+  for(int i = 0; i < 3; i++)
   {
-    game.start_game();
+
+    
+    if(game.min_players())
+    {
+      game.start_game();
+    }
+    
+    print_game(game);
+  
+    game.check();
+    game.fold();
+    game.check();
+    game.check();
+    
+    
+    assert( game.round_over() );
+    
+    print_game(game);
+    
+    game.next_stage();
+    
+    bool e1[NUM_CARDS] = {false, false, true, false, true};
+    bool e2[NUM_CARDS] = {false, true, false, true, true};
+    
+    game.exchange(e1);
+    game.exchange(e2);
+    game.exchange(e1);
+    
+    
+    print_game(game);
+    
+    assert( game.round_over() );
+    
+    game.next_stage();
+    game.check();
+    game.bet(10);
+    game.raise(20);
+    game.call();
+    game.call();
+    
+    assert( game.round_over() );
+    
+    print_game(game);
+    
+    game.next_stage();
+    assert( game.game_over() );
+    
+    game.end_game();
   }
-  
-  print_game(game);
-
-  game.check();
-  game.fold();
-  game.bet(10);
-  game.call();
-  game.call();
-  
-  
-  assert( game.round_over() );
-  
-  print_game(game);
-  
-  game.next_stage();
-  
-  bool e1[NUM_CARDS] = {false, false, true, false, true};
-  bool e2[NUM_CARDS] = {false, true, false, true, true};
-  
-  game.exchange(e1);
-  game.exchange(e2);
-  game.exchange(e1);
-  
-  
-  print_game(game);
-  
-  assert( game.round_over() );
-  
-  game.next_stage();
-  game.check();
-  game.bet(10);
-  game.raise(20);
-  game.call();
-  game.call();
-  
-
-  Player p5;
-  game.player_join(p5);
-  
-  assert( game.round_over() );
-  
-  print_game(game);
-  
-  game.next_stage();
-  assert( game.game_over() );
-  
-  game.end_game();
   
   return 0;
 }

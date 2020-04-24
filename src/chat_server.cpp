@@ -173,6 +173,27 @@ private:
 	            sending.encode_header();
                room_.deliver(sending);
             }
+            
+            // game just ended.....send game message that the winner was decided
+            // then wait 5 seconds to restart the game
+            if( dealer->is_game_idling() )
+            {
+              to_player.clear();
+              std::this_thread::sleep_for( std::chrono::seconds(5) );
+              dealer->restart_game(to_player);
+              
+              t = to_player.dump();
+              
+              if (t.size() < chat_message::max_body_length)
+              {
+                std::cout << "Sending '" << t << "' to players" << std::endl;
+                memcpy( sending.body(), t.c_str(), t.size() );
+                sending.body_length(t.size());
+                sending.encode_header();
+                room_.deliver(sending);
+              }
+            }
+            
             mut.unlock();
             do_read_header();
           }

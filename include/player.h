@@ -42,6 +42,7 @@ class Player
     std::vector<Card>& get_hand();
     Card get_card(int);
     bool get_bet_status();
+    void clear_hand();
     
     // Setters
     void set_UUID(std::string);

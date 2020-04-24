@@ -24,6 +24,17 @@ Dealer::~Dealer() { }
 // M E T H O D S
 // /////////////
 
+bool Dealer::is_game_idling()
+{
+  return game.is_idle();
+}
+
+void Dealer::restart_game(nlohmann::json& to_player)
+{
+  game.start_game(); // start game again
+  game.write_game_state(to_player);
+}
+
 void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
 {
   std::string event = to_dealer["event"];
@@ -93,12 +104,6 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   {
     std::cout << "Game is over."  << std::endl; 
     game.end_game();      // call end game
-    
-    // check if there are a minimum players before starting
-    if( game.min_players() )
-    {
-      game.start_game();
-    }
   }
   
   game.write_game_state( to_player );

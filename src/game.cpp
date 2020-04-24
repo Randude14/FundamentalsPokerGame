@@ -50,13 +50,15 @@ void Game::shuffle_deck()
       deck.push_back(it);
     }
     
-   player->get_hand().clear();
+   player->clear_hand();
   }
   
   for(auto &it : discard_pile)
   {
     deck.push_back(it);
   }
+  
+  discard_pile.clear();
   
   assert( validate_deck() );
   
@@ -68,8 +70,14 @@ void Game::shuffle_deck()
 
 bool Game::validate_deck()
 {
-  if(deck.size() != NORMAL_DECK_SIZE)
+  if(deck.size() > NORMAL_DECK_SIZE)
   {
+    std::cout << "Deck size is too large." << std::endl;
+    return false;
+  }
+    if(deck.size() < NORMAL_DECK_SIZE)
+  {
+    std::cout << "Deck size is too small." << std::endl;
     return false;
   }
   // use a 2d grid (Suits X Values) to validate the deck
@@ -85,6 +93,7 @@ bool Game::validate_deck()
     // we have repeats...
     if(grid[suit][value] >= 2)
     {
+      std::cout << "Deck has repeats." << std::endl;
       return false;
     }
   }
@@ -96,6 +105,7 @@ bool Game::validate_deck()
       // card missing
       if(grid[i][j] != 1)
       {
+        std::cout << "Deck is missing cards." << std::endl;
         return false;
       }
     }
@@ -442,8 +452,11 @@ void Game::start_game()
 {
   // only start game when it was idling
   assert(game_stage == IDLE);
+  assert( min_players() );
   
   this->shuffle_deck();
+  prize_pot = 0;
+  current_bet = 0;
   folded = 0;
   
   for(int i = 0; i < NUM_CARDS; i++)
@@ -484,12 +497,25 @@ void Game::end_game()
   game_stage = IDLE;
   determine_winners();
   
-  for(auto& player : winners)
+  if(winners.size() > 1)
   {
-    std::cout << player.get_name() << " has won!" << std::endl;
+    std::cout << "We have a tie!" << std::endl;
   }
   
-  std::cout << winners.size() << std::endl;
+  // normally this will be divided by 1 but there may be a tie
+  double earnings = prize_pot / winners.size();
+  
+  for(auto& player_index : winners)
+  {
+    Player* winner = &players[player_index];
+    std::cout << winner->get_name() << " has won!" << std::endl;
+    
+    double wallet = winner->get_wallet();
+    wallet += earnings;
+    winner->set_wallet(wallet);
+  }
+  
+  std::cout << std::endl << std::endl;
 }
 
 bool Game::round_over()
@@ -558,20 +584,16 @@ void Game::next_player()
   }
 }
 
-/*
-  Description: compares two hands of different players
-  Returns: -1 if p2 hand ranking > p1 hand ranking, 1 for p1 > p2, and 0 for tie
- */
-int compare_hands(Player p1, Player p2)
+int Game::compare_hands(Player* p1, Player* p2)
 {
-  auto hand1 = p1.get_hand();
-  auto hand2 = p2.get_hand();
+  auto hand1 = p1->get_hand();
+  auto hand2 = p2->get_hand();
   
   assert( hand1.size() == NUM_CARDS );
   assert( hand2.size() == NUM_CARDS );
 
-  auto ranking1 = p1.get_hand_ranking();
-  auto ranking2 = p2.get_hand_ranking();
+  auto ranking1 = p1->get_hand_ranking();
+  auto ranking2 = p2->get_hand_ranking();
   
   // compare hand rankings first
   if(ranking1 < ranking2)
@@ -586,7 +608,6 @@ int compare_hands(Player p1, Player p2)
   // if rankings equal, compare cards in descending order
   for(int i = 0; i < NUM_CARDS; i++)
   {
-    std::cout << "comparing " << (int)(hand1[i].value) << " and " << (int)(hand2[i].value) << std::endl;
     if(hand1[i].value < hand2[i].value)
     {
       return -1;
@@ -598,12 +619,6 @@ int compare_hands(Player p1, Player p2)
   }
   
   return 0;  
-}
-
-// used to sort the winners
-bool sort_hands(Player p1, Player p2)
-{
-  return compare_hands(p1, p2) < 0;
 }
 
 void Game::determine_winners()
@@ -618,21 +633,26 @@ void Game::determine_winners()
     
     if(! player->has_folded())
     {
-      winners.push_back(*player);
+      winners.push_back(i);
     }
   }
   
-  std::sort(winners.begin(), winners.end(), sort_hands);
-  Player* top = &winners[0];
+  std::sort(winners.begin(), winners.end(), winner_comparer(this) );
+  int top_index = winners[0];
+  Player* top = &players[top_index];
   
   for(unsigned int i = 1; i < winners.size(); i++)
   {
-    Player* player = &winners[i];
+    int index = winners[i];
+    Player* player = &players[index];
     
-    if(compare_hands(*top, *player) > 0)
+    int cmp = compare_hands(top, player);
+    
+    if(cmp > 0)
     {
       std::cout << player->get_name() << " lost." << std::endl;
       winners.erase( winners.begin() + i);
+      i--;
     }
   }
   
