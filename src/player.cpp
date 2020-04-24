@@ -69,7 +69,8 @@ Player& Player::operator=(const Player& other)
   return *this;
 }
 
-// Getters
+////////////////////////////////////////////////////////////////////////////////
+// G E T T E R S
 std::string Player::get_UUID()
 {
   return boost::lexical_cast<std::string>(UUID);
@@ -110,6 +111,11 @@ bool Player::has_folded()
   return folded;
 }
 
+std::array<bool, NUM_CARDS> Player::get_discards()
+{
+  return discards;
+}
+
 int Player::get_numDiscards()
 {
   return numDiscards;
@@ -137,7 +143,8 @@ void Player::draw_card(Card card)
 }
 
 
-// Setters
+////////////////////////////////////////////////////////////////////////////////
+// S E T T E R S
 void Player::set_UUID(std::string uuid)
 {
   UUID = boost::lexical_cast<boost::uuids::uuid>(uuid);
@@ -176,6 +183,11 @@ void Player::set_folded(bool flag)
 void Player::set_wallet(double w)
 {
   wallet = w;
+}
+
+void Player::discard(int index, bool value)
+{
+  discards[index] = value;
 }
 
 void Player::set_numDiscards(int cards)

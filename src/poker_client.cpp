@@ -370,12 +370,14 @@ void  poker_client::on_hand_click_##NUM()                       \
     Card card = player->get_card(NUM-1);                        \
     std::string image = get_card_file(card);                    \
     cards[NUM-1]->set(image);                                   \
+    player->discard(NUM-1, true);                               \
     player->incr_numDiscards();                                 \
   }                                                             \
   else                                                          \
   {                                                             \
     Player* player = players[ main_player ];                    \
     cards[NUM-1]->set(card_down_file);                          \
+    player->discard(NUM-1, false);                              \
     player->decr_numDiscards();                                 \
   }                                                             \
 }

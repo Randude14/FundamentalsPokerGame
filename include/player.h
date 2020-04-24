@@ -37,6 +37,7 @@ class Player
     double get_current_bet();
     double get_total_bet();
     bool has_folded();
+    std::array<bool, NUM_CARDS> get_discards();
     int get_numDiscards();
     Hand_rankings get_hand_ranking();
     std::vector<Card>& get_hand();
@@ -51,6 +52,7 @@ class Player
     void set_current_bet(double);
     void set_total_bet(double);
     void set_wallet(double);
+    void discard(int, bool);
     void set_numDiscards(int);
     void incr_numDiscards();
     void decr_numDiscards();
@@ -68,6 +70,7 @@ class Player
     std::string name;
     double wallet;
     std::vector<Card> hand;
+    std::array<bool, NUM_CARDS> discards;
     bool folded;
     double this_bet;
     double total_bet;
