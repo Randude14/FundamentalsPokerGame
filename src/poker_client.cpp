@@ -117,7 +117,9 @@ int poker_client::run()
   GET_WIDGET("Poker++", main_window);
   
   // set title....the builder apparently changes the title from the glade file. No biggie
-  main_window->set_title(APP_TITLE);  
+  std::string window_title = APP_TITLE;
+  window_title += std::string("   ") + playername;
+  main_window->set_title(window_title);  
   
   // create communicator
   comm = new client_communicator(this, host, port);
@@ -210,7 +212,9 @@ int poker_client::run()
   update_client();
   
   // Run the window
-  auto main_app = Gtk::Application::create(APP_NAME);
+  std::string appname = APP_NAME;
+  appname += std::string(".") + playername;
+  auto main_app = Gtk::Application::create(appname);
   int ret = main_app->run(*main_window);
   
   this->close();
@@ -392,7 +396,7 @@ void poker_client::on_check_click()
 {
   // can't check if there is a bet
   //assert( comm->current_bet <= 0 );
-  comm->send_action("check");
+  //comm->send_action("check");
 }
 
 void poker_client::on_bet_click()
@@ -402,21 +406,21 @@ void poker_client::on_bet_click()
   //assert(bet >= comm->current_bet);
   
   // internally this is a call rather than a bet
-  comm->send_action("bet", bet); 
+  //comm->send_action("bet", bet); 
 }
 
 void poker_client::on_call_click()
 {
   // set bet value slider to current bet
-  comm->send_action("call", comm->current_bet );
+  //comm->send_action("call", comm->current_bet );
 }
 
 void poker_client::on_fold_click()
 {
-  comm->send_action("fold");
+  //comm->send_action("fold");
 }
 
 void poker_client::on_discard_click()
 {
-  comm->send_action("discard");
+  //comm->send_action("discard");
 }

@@ -5,5 +5,6 @@ poker_client
 poker_server
 chat_client
 chat_server
+dealer_test
 
 /src/*.o

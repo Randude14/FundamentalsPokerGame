@@ -4,10 +4,6 @@
 #include "game.h"
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <random>       // std::default_random_engine
-#include <chrono>       // std::chrono::system_clock
-#include <bits/stdc++.h>
 
 
 
@@ -22,49 +18,88 @@ Dealer::Dealer()
 
 Dealer::~Dealer() { }
 
+
+
 // /////////////
 // M E T H O D S
 // /////////////
 
-int Dealer::compare_hands(Player* p1, Player* p2)
-{
-  for(int i = 0; i < NUM_CARDS; i++)
-  {
-    if(p1->hand[i].value < p2->hand[i].value)
-    {
-      return -1;
-    }
-    else if(p1->hand[i].value > p2->hand[i].value)
-    {
-      return 1;
-    }
-  }
-  
-  return 0;
-}
-
-void Dealer::determine_winner()
-{ 
-  Player* winner = game.players[0];
-  
-  for(int i = 1; i < game.num_players; i++)
-  {
-    Player* other = &game.players[i];
-    // player @ i has a better hand than current winner
-    if(compare_hands(winner, other) < 0)
-    {
-      winner = other;
-    }
-  }
-  
-  //winner[playersNo] will hold the highest rank
-  std::cout << winner->name <<" is the winner" << std::endl;
-}
-
 void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
 {
-  std::string action = to_dealer["action"];
-  std::cout << "Player invoked " << action << std::endl;
+  std::string event = to_dealer["event"];
+  std::string uuid = to_dealer["from"]["uuid"];
+  std::string name = to_dealer["from"]["name"];
+  
+  std::cout << name << " invoked " << event << std::endl;
+  // used to flag that only the game state info should be sent
+  // should only be set to true when a player joins
+  
+  // new player has joined the game
+  if(event == "join")
+  {
+    Player player;
+
+    player.set_UUID(uuid);
+    player.set_name(name);
+    
+    if(game.player_join(player))
+    {
+      std::cout << "Player " << name << " joined." << std::endl;
+    }
+  }
+  // player inputs from a player currently in the game
+  else
+  {
+    // check this is the correct player
+    assert( game.is_current_player(uuid) );
+  }
+  
+  
+  // player actions
+  if(event == "check")
+  {
+    game.check();
+  }
+  else if(event == "bet")
+  {
+    double amount = to_dealer["current_bet"];
+    game.bet(amount);
+  }
+  else if(event == "raise")
+  {
+    double amount = to_dealer["current_bet"];
+    game.raise(amount);
+  }
+  else if(event == "fold")
+  {
+    game.fold();
+  }
+  else if(event == "exchange")
+  {
+    // TODO: replace later with json info
+    bool to_exchange[NUM_CARDS] = {false};
+    game.exchange(to_exchange);
+  }  
+  
+  // advance to next round
+  if( game.round_over() )
+  {
+    game.next_stage();
+    std::cout << "Advancing to next stage" << std::endl;
+  }
+ 
+  // game is over
+  if( game.game_over() )
+  {
+    std::cout << "Game is over."  << std::endl; 
+    game.end_game();      // call end game
+    
+    // check if there are a minimum players before starting
+    if( game.min_players() )
+    {
+      game.start_game();
+    }
+  }
   
   game.write_game_state( to_player );
 }

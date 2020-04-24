@@ -36,16 +36,24 @@ class Player
     std::string get_message();
     double get_current_bet();
     double get_total_bet();
+    bool has_folded();
     int get_numDiscards();
+    Hand_rankings get_hand_ranking();
+    std::vector<Card>& get_hand();
     
     // Setters
     void set_UUID(std::string);
     void set_name(std::string);
     void set_action(std::string);
     void set_message(std::string);
-    void set_current_bet(bet_amount);
-    void set_total_bet();
-    void set_numDiscards();
+    void set_current_bet(double);
+    void set_total_bet(double);
+    void set_wallet(double);
+    void set_numDiscards(int);
+    void set_folded(bool);
+    void set_hand_ranking(Hand_rankings);
+    void set_hand( std::vector<Card>);
+    void draw_card(Card);
     void calculate_handvalue();  // calculate the player's hand value
 
   private:
@@ -54,18 +62,13 @@ class Player
     std::string name;
     double wallet;
     std::vector<Card> hand;
-    double bet_amount;
-    bool has_bet;
     bool folded;
-    
+    double this_bet;
+    double total_bet;
     Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};
     std::string action;
     std::string message;
-    double this_bet;
-    double total_bet;
     int numDiscards;
-    
-    Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};
     
     // -1 if other player has a better hand, 1 if this player has the better hand and 0 for tie
     int compare_hands(Player& other);

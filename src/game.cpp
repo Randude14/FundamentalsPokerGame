@@ -14,7 +14,6 @@ Game::Game()
   prize_pot = 0.0;
   current_bet = 0.0;
   game_stage = IDLE;
-  num_players = 0;
   agreed = 0;
   
   Suit S;
@@ -42,16 +41,16 @@ Game::~Game() { }
 void Game::shuffle_deck()
 {
   // retrieve cards from players and discard pile (if any)
-  for(int i = 0; i < num_players; i++)
+  for(unsigned int i = 0; i < players.size(); i++)
   {
     Player* player = &players[i];
     
-    for(auto &it : player->hand)
+    for(auto &it : player->get_hand())
     {
       deck.push_back(it);
     }
     
-   player->hand.clear();
+   player->get_hand().clear();
   }
   
   for(auto &it : discard_pile)
@@ -133,7 +132,7 @@ void Game::calculate_handvalue(Player* player)
 {
   counts.clear();
   Hand_rankings hand_ranking = Hand_rankings::HIGH_CARD;
-  auto hand = player->hand;
+  auto hand = player->get_hand();
   
   // rank whether this hand is a flush
   bool flush = true;
@@ -248,90 +247,150 @@ void Game::calculate_handvalue(Player* player)
     }
   }
   
-  player->hand_ranking = hand_ranking;
+  player->set_hand(hand);
+  player->set_hand_ranking( hand_ranking );
 }
 
 // *********** PLAYER ACTIONS ********************************************************
 
 bool Game::player_join(Player player)
 {
-  if(num_players >= MAX_PLAYERS)
+  if(players.size() >= MAX_PLAYERS)
   {
     return false;
   }
   
   // treat player as a folded player
   // player will be ignored until next round
-  player.folded = true;
-  player.table_position = num_players + 1;
-  players[num_players] = player;
-  num_players++;
+  player.set_folded(true);
+  players.push_back( player );
+  
+  // middle of game...increase agreed so that round over is triggered
+  if(game_stage != IDLE)
+  {
+    agreed++;
+    folded++;
+  }
   
   return true;
 }
 
 void Game::check()
 {
+  assert(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2);
   agreed++;
+  
+  this->next_player();
 }
 
 void Game::bet(double amount)
 {
-  // reset the agreed amount, all players must agree to this bet or fold
-  agreed = 1;
-  
   Player* current_player = &players[current_turn];
+  assert(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2);
+  assert( current_player->get_wallet() >= amount && current_player->get_current_bet() == 0);
+  assert( current_bet == 0 );
+  agreed = folded + 1;
+  
+  // get player attributes
+  auto wallet = current_player->get_wallet();
+  auto p_total_bet = current_player->get_total_bet();
+  
+  current_bet = amount;
   
   // only increase the pot by the difference in their last bet, if there was one
-  prize_pot += (amount - current_player->bet_amount);
-  // only decrease player wallet from the different on their last bet, if there was one
-  current_player->wallet -= (amount - current_player->bet_amount);
-  current_player->bet_amount = amount;
-  current_bet = amount;
+  prize_pot += amount;
+  // only decrease player wallet by the difference in their last bet, if there was one
+  wallet -= amount;
+  p_total_bet += amount;
+  double p_current_bet = amount;
+  
+  // set player attributes
+  current_player->set_current_bet(p_current_bet);
+  current_player->set_total_bet(p_total_bet);
+  current_player->set_wallet(wallet);
+  
+  this->next_player();
 }
 
 void Game::raise(double amount)
-{
-  // reset the agreed amount, all players must agree to this bet or fold
-  agreed = 1;
-  
+{ 
   Player* current_player = &players[current_turn];
+  // can't raise bet if bet was never raise to begin with...
+  assert( current_bet != 0 );
+  assert( current_player->get_wallet() >= current_bet + amount );
+  assert(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2);
+  agreed = folded + 1;
+  
+  // get player attributes
+  auto p_current_bet = current_player->get_current_bet();
+  auto p_total_bet = current_player->get_total_bet();
+  auto wallet = current_player->get_wallet();
+  
+  current_bet += amount;
   
   // only increase the pot by the difference in their last bet, if there was one
-  prize_pot += (amount - current_player->bet_amount);
-  // only decrease player wallet from the different on their last bet, if there was one
-  current_player->wallet -= (amount - current_player->bet_amount);
-  current_player->bet_amount = amount;
-  current_bet = amount;
+  prize_pot += (current_bet - current_player->get_current_bet());
+  // only decrease player wallet by the difference in their last bet, if there was one
+  wallet -= (current_bet - p_current_bet);
+  p_total_bet += (current_bet - p_current_bet);
+  p_current_bet = current_bet;
+  
+  // set player attributes
+  current_player->set_current_bet(p_current_bet);
+  current_player->set_total_bet(p_total_bet);
+  current_player->set_wallet(wallet);
+  
+  
+  this->next_player();
 }
 
 void Game::call()
 {
-  agreed++;
   Player* current_player = &players[current_turn];
+  assert( ( current_player->get_wallet() - current_player->get_current_bet() ) >= current_bet );
+  assert(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2);
+  agreed++;
+  
+  // get player attributes
+  auto p_current_bet = current_player->get_current_bet();
+  auto p_total_bet = current_player->get_total_bet();
+  auto wallet = current_player->get_wallet();
   
   // only increase the pot by the difference in their last bet, if there was one
-  prize_pot += (current_bet - current_player->bet_amount);
+  prize_pot += (current_bet - current_player->get_current_bet());
   // only decrease player wallet by the difference in their last bet, if there was one
-  current_player->wallet -= (current_bet - current_player->bet_amount);
-  current_player->bet_amount = current_bet;
+  wallet -= (current_bet - p_current_bet);
+  p_total_bet += (current_bet - p_current_bet);
+  p_current_bet = current_bet;
+  
+  // set player attributes
+  current_player->set_current_bet(p_current_bet);
+  current_player->set_total_bet(p_total_bet);
+  current_player->set_wallet(wallet);
+  
+  this->next_player();
 }
 
 void Game::fold()
 {
+  assert(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2);
   agreed++;
+  folded++;
   Player* current_player = &players[current_turn];
-  current_player->folded = true;
+  current_player->set_folded(true);
   
+  this->next_player();
   // nothing to do with pot...whatever bet the player had was already added
 }
 
 void Game::exchange(bool to_exchange[NUM_CARDS])
 {
+  assert(game_stage == EXCHANGE_ROUND);
   Player* current_player = &players[current_turn];
   agreed++;
   
-  assert(current_player->hand.size() == NUM_CARDS); // double check hand size
+  auto hand = current_player->get_hand();
+  assert(hand.size() == NUM_CARDS); // double check hand size
   assert( deck.size() >= NUM_CARDS );              // must have enough cards to exchange
   
   for(int i = 0; i < NUM_CARDS; i++)
@@ -340,34 +399,43 @@ void Game::exchange(bool to_exchange[NUM_CARDS])
     if(to_exchange[i])
     {
       // discard this card and draw from the top of the deck
-      Card discard = current_player->hand[i];
+      Card discard = hand[i];
       discard_pile.push_back(discard);
       
       // draw from deck
       Card exchange = deck[0];
       deck.erase( deck.begin() );
       
-      current_player->hand[i].value = exchange.value;
-      current_player->hand[i].suit = exchange.suit;
+      hand[i].value = exchange.value;
+      hand[i].suit = exchange.suit;
     }
   }
   
+  current_player->set_hand(hand);
   // recaulcate the hand value after exchange
   this->calculate_handvalue(current_player);
+  this->next_player();
 }
+
+
 
 // ************ GAME STAGE LOGIC ***********************************************************
 
 bool Game::min_players()
 {
-  return num_players >= 2;
+  return players.size() >= 2;
 }
 
-bool Game::is_player_current_turn(boost::uuids::uuid& UUID)
+bool Game::is_idle()
 {
-  Player current_player = players[current_turn];
+  return game_stage == IDLE;
+}
+
+bool Game::is_current_player(std::string& UUID)
+{
+  Player* current_player = &players[current_turn];
   
-  return (current_player.UUID == UUID);
+  return ( UUID == current_player->get_UUID() );
 }
 
 void Game::start_game()
@@ -376,65 +444,95 @@ void Game::start_game()
   assert(game_stage == IDLE);
   
   this->shuffle_deck();
-  this->next_stage();
+  folded = 0;
   
   for(int i = 0; i < NUM_CARDS; i++)
   {
-    for(int j = 0; j < num_players; j++)
+    for(unsigned int j = 0; j < players.size(); j++)
     {
       // draw card
       Card draw = deck[0];
       deck.erase( deck.begin() );
       
       Player* player = &players[j];
-      player->hand.push_back(draw);
+      player->set_current_bet(0);
+      player->set_total_bet(0);
+      player->set_folded(false);
+      player->draw_card(draw);
       
       // calcualte hand values on last card
       if(i == NUM_CARDS-1)
       {
         calculate_handvalue(player);
+        
+        // add player anties if the first betting round
+        double wallet = player->get_wallet();
+        wallet--;
+        player->set_wallet(wallet);
+        prize_pot++;
       }
     }
   }
+  
+  this->next_stage();
+}
+
+void Game::end_game()
+{
+  assert( game_over() );
+  
+  game_stage = IDLE;
+  determine_winners();
+  
+  for(auto& player : winners)
+  {
+    std::cout << player.get_name() << " has won!" << std::endl;
+  }
+  
+  std::cout << winners.size() << std::endl;
 }
 
 bool Game::round_over()
 {
-  return agreed == num_players;
+  return agreed == players.size();
 }
 
-bool Game::is_game_over()
+bool Game::game_over()
 {
   return game_stage == END;
 }
 
 void Game::next_stage()
 {
-  assert(num_players >= 2);
-  agreed = 0;
+  assert(players.size() >= 2);
+  agreed = folded;
   game_stage++;
-  current_turn = 0;
+  current_turn = -1;
+  current_bet = 0;
   
   // no stage after the end, stop here
-  if(game_stage == END)
+  if(game_stage >= END)
   {
+    game_stage = END;
     return;
   }
   
+  // if there is only one player that has not folded...end game
+  if(folded > players.size()-2)
+  {
+    std::cout << "Game end   "  << folded << std::endl;
+    game_stage = END;
+    return;
+  }
   
-  for(int i = 0; i < num_players; i++)
+  for(unsigned int i = 0; i < players.size(); i++)
   {
     Player* player = &players[i];
-    player->bet_amount = 0;
-    player->folded = false;
-    
-    // add player anties if the first betting round
-    if(game_stage == BET_ROUND_1)
-    {
-      player->wallet--;
-      prize_pot++;
-    }
+    player->set_current_bet(0);
   }
+  
+  // go to next player
+  next_player();
 }
 
 void Game::next_player()
@@ -447,26 +545,99 @@ void Game::next_player()
     do
     {
       current_turn++;
-      if(current_turn == num_players)
+      if(current_turn == (int)players.size())
       {
         current_turn = 0;
       }
       player = &players[current_turn];
-      
-      if(player->folded)
-      {
-        agreed++;
-      }
-      else
-      {
-        break;
-      }
     }
     // ignore players that have folded
-    while(player->folded == true || agreed != num_players);
+    while( player->has_folded() );
     
     
   }
+}
+
+/*
+  Description: compares two hands of different players
+  Returns: -1 if p2 hand ranking > p1 hand ranking, 1 for p1 > p2, and 0 for tie
+ */
+int compare_hands(Player p1, Player p2)
+{
+  auto hand1 = p1.get_hand();
+  auto hand2 = p2.get_hand();
+  
+  assert( hand1.size() == NUM_CARDS );
+  assert( hand2.size() == NUM_CARDS );
+
+  auto ranking1 = p1.get_hand_ranking();
+  auto ranking2 = p2.get_hand_ranking();
+  
+  // compare hand rankings first
+  if(ranking1 < ranking2)
+  {
+    return -1;
+  }
+  else if(ranking1 > ranking2)
+  {
+    return 1;
+  }
+  
+  // if rankings equal, compare cards in descending order
+  for(int i = 0; i < NUM_CARDS; i++)
+  {
+    std::cout << "comparing " << (int)(hand1[i].value) << " and " << (int)(hand2[i].value) << std::endl;
+    if(hand1[i].value < hand2[i].value)
+    {
+      return -1;
+    }
+    else if(hand1[i].value > hand2[i].value)
+    {
+      return 1;
+    }
+  }
+  
+  return 0;  
+}
+
+// used to sort the winners
+bool sort_hands(Player p1, Player p2)
+{
+  return compare_hands(p1, p2) < 0;
+}
+
+void Game::determine_winners()
+{ 
+  // this vector will store the players in descending order 
+  // according their ranking against each other
+  winners.clear();
+  
+  for(unsigned int i = 0; i < players.size(); i++)
+  {
+    Player* player = &players[i];
+    
+    if(! player->has_folded())
+    {
+      winners.push_back(*player);
+    }
+  }
+  
+  std::sort(winners.begin(), winners.end(), sort_hands);
+  Player* top = &winners[0];
+  
+  for(unsigned int i = 1; i < winners.size(); i++)
+  {
+    Player* player = &winners[i];
+    
+    if(compare_hands(*top, *player) > 0)
+    {
+      std::cout << player->get_name() << " lost." << std::endl;
+      winners.erase( winners.begin() + i);
+    }
+  }
+  
+  //winner[playersNo] will hold the highest rank
+  //std::cout << winner->get_name() <<" is the winner" << std::endl;
 }
 
 void Game::write_game_state(nlohmann::json& to_player)
@@ -479,18 +650,19 @@ void Game::write_game_state(nlohmann::json& to_player)
   {
     std::cout << "index " << i << std::endl;
     Player* player = &players[i];
-    to_player["players"][i]["name"] = player->name;
-    to_player["players"][i]["uuid"] = boost::lexical_cast<std::string>(player->UUID);
-    to_player["players"][i]["wallet"] = player->wallet;
-    to_player["players"][i]["bet_amount"] = player->bet_amount;
-    to_player["players"][i]["has_bet"] = player->has_bet;
+    to_player["players"][i]["name"] = player->get_name();
+    to_player["players"][i]["uuid"] = player->get_UUID();
+    to_player["players"][i]["wallet"] = player->get_wallet();
+    to_player["players"][i]["this_bet"] = player->get_current_bet();
+    
+    auto hand = player->get_hand();
     
     // write player's hand
     for(int j = 0; j < NUM_CARDS; j++)
     {
-      std::string hand_string = std::to_string( static_cast<int>(player->hand[j].suit) );
+      std::string hand_string = std::to_string( static_cast<int>(hand[j].suit) );
       hand_string += std::string(" ");
-      hand_string += std::to_string(static_cast<int>(player->hand[j].value));
+      hand_string += std::to_string(static_cast<int>(hand[j].value));
       to_player["players"][i]["cards"][j] = hand_string;
     }
   }
@@ -498,7 +670,5 @@ void Game::write_game_state(nlohmann::json& to_player)
   // write the game attributes
   to_player["prize_pot"] = prize_pot;
   to_player["current_bet"] = current_bet;
-  to_player["current_turn"] = current_turn;
   to_player["game_stage"] = game_stage;
-  to_player["prize_pot"] = prize_pot;
 }

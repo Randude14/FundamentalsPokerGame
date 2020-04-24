@@ -8,19 +8,24 @@
 void print_game(Game& game)
 {
   std::cout << "Prize Pot: " << game.prize_pot << std::endl;
-  std::cout << "Player size: " << game.num_players << std::endl;
-  for(int i = 0; i < game.num_players; i++)
+  std::cout << "Player size: " << game.players.size() << std::endl << "---------" << std::endl;
+  for(unsigned int i = 0; i < game.players.size(); i++)
   {
-    Player* player = &game.players[i];
-    std::cout << "Name: " << player->name << std::endl;
-    std::cout << "Wallet: " << player->wallet << std::endl;
+    Player* player = &game.players.at(i);
+    std::cout << "Name: " << player->get_name() << std::endl;
+    std::cout << "Wallet: " << player->get_wallet() << std::endl;
+    std::cout << "Folded: " << player->has_folded() << std::endl;
+    std::cout << "Current Bet : " << player->get_current_bet() << std::endl;
+    std::cout << "Total Bet: " << player->get_total_bet() << std::endl;
     std::cout << "Cards: ";
-    for(unsigned int j = 0; j < player->hand.size(); j++)
+    
+    auto hand = player->get_hand();
+    for(unsigned int j = 0; j < hand.size(); j++)
     {
-      Card card = player->hand.at(j);
+      Card card = hand.at(j);
       std::cout << "(" << card.get_int_suit() << "," << card.get_int_value() << "), ";
     }
-    std::cout << std::endl;
+    std::cout << std::endl << std::endl;
   }
   
   std::cout << std::endl;
@@ -32,9 +37,13 @@ int main(int argc, char* argv[])
 {
   Game game;
   Player player1;
+  player1.set_name("Randall");
   Player player2;
+  player2.set_name("Robbie");
   Player player3;
+  player3.set_name("Bud");
   Player player4;
+  player4.set_name("Shishir");
   
   game.player_join(player1);
   game.player_join(player2);
@@ -47,12 +56,13 @@ int main(int argc, char* argv[])
   }
   
   print_game(game);
+
+  game.check();
+  game.fold();
+  game.bet(10);
+  game.call();
+  game.call();
   
-  for(int i = 0; i < game.num_players; i++)
-  {
-    game.check();
-    game.next_player();
-  }
   
   assert( game.round_over() );
   
@@ -64,42 +74,33 @@ int main(int argc, char* argv[])
   bool e2[NUM_CARDS] = {false, true, false, true, true};
   
   game.exchange(e1);
-  game.next_player();
   game.exchange(e2);
-  game.next_player();
-  game.exchange(e2);
-  game.next_player();
   game.exchange(e1);
-  game.next_player();
+  
+  
+  print_game(game);
   
   assert( game.round_over() );
   
   game.next_stage();
-  
+  game.check();
   game.bet(10);
-  game.next_player();
-  game.bet(20);
-  game.next_player();
+  game.raise(20);
   game.call();
-  game.next_player();
   game.call();
-  game.next_player();
-  game.bet(30);
-  game.next_player();
-  game.fold();
-  game.next_player();
-  game.call();
-  game.next_player();
-  game.fold();
-  game.next_player();
+  
 
+  Player p5;
+  game.player_join(p5);
   
   assert( game.round_over() );
   
   print_game(game);
   
   game.next_stage();
-  assert( game.is_game_over() );
+  assert( game.game_over() );
+  
+  game.end_game();
   
   return 0;
 }

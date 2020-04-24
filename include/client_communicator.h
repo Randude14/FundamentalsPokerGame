@@ -53,7 +53,13 @@ class client_communicator
     chat_client* comm;                 // this will connect with the dealer/server
     asio::io_context io_context;
     std::thread* comm_t;               // thread to run the asio and chat_client
-    void send_action(std::string action, int bet=0);   // write message to chat_client
+    void send_action(int cards,
+                                      std::string chat,
+                                      double curr_bet,
+                                      std::string event,
+                                      std::string uuid,
+                                      std::string name,
+                                      double tot_bet);   // write message to chat_client
 };
 
 using asio::ip::tcp;
