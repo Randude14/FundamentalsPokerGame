@@ -28,9 +28,6 @@ Dealer::~Dealer() { }
 
 int Dealer::compare_hands(Player* p1, Player* p2)
 {
-  if(p1->hand_ranking != p2->hand_ranking)
-    return p1->hand_ranking < p2->hand_ranking;
-  
   for(int i = 0; i < NUM_CARDS; i++)
   {
     if(p1->hand[i].value < p2->hand[i].value)
@@ -48,7 +45,7 @@ int Dealer::compare_hands(Player* p1, Player* p2)
 
 void Dealer::determine_winner()
 { 
-  Player* winner = &game.players[0];
+  Player* winner = game.players[0];
   
   for(int i = 1; i < game.num_players; i++)
   {

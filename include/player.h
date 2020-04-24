@@ -24,13 +24,33 @@ class Player
 {
   public:
     Player();                     // Set player defaults
-    Player(const Player& other); // Copy constructor
+    Player(const Player& other);  // Copy constructor
     Player& operator=(const Player& other);
     virtual ~Player();
+    
+    // Getters
+    std::string get_UUID();
+    std::string get_name();
+    double get_wallet();
+    std::string get_action();
+    std::string get_message();
+    double get_current_bet();
+    double get_total_bet();
+    int get_numDiscards();
+    
+    // Setters
+    void set_UUID(std::string);
+    void set_name(std::string);
+    void set_action(std::string);
+    void set_message(std::string);
+    void set_current_bet(bet_amount);
+    void set_total_bet();
+    void set_numDiscards();
+    void calculate_handvalue();  // calculate the player's hand value
 
+  private:
     // Player attributes
     boost::uuids::uuid UUID;
-    int table_position;
     std::string name;
     double wallet;
     std::vector<Card> hand;
@@ -39,6 +59,16 @@ class Player
     bool folded;
     
     Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};
+    std::string action;
+    std::string message;
+    double this_bet;
+    double total_bet;
+    int numDiscards;
+    
+    Hand_rankings hand_ranking{Hand_rankings::HIGH_CARD};
+    
+    // -1 if other player has a better hand, 1 if this player has the better hand and 0 for tie
+    int compare_hands(Player& other);
 };
 
 #endif // PLAYER_H
