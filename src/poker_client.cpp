@@ -494,6 +494,50 @@ void poker_client::on_discard_click()
   make_json(player);
 }
 
+void poker_client::bet_sensitivity()
+{
+  // Prevent player from flipping and exchanging cards
+  for(int idx = 0; idx < NUM_CARDS; idx++)
+  {
+    card_buttons[idx]->set_sensitive(false);
+  }
+  
+  discard_button->set_sensitive(false);
+  
+  // Set Check, Bet, Call, Fold button sensitivity
+  if(comm->current_bet > 0.0)
+  {
+    check_button->set_sensitive(false);
+  }
+  
+  bet_button->set_sensitive(true);
+  
+  if(players[main_player]->get_current_bet() < comm->current_bet)
+  {
+    call_button->set_sensitive(true);
+  }
+  
+  fold_button->set_sensitive(true);
+
+}
+
+void poker_client::exchange_sensitivity()
+{
+  // Allow player to flip and exchange cards
+  for(int idx = 0; idx < NUM_CARDS; idx++)
+  {
+    card_buttons[idx]->set_sensitive(true);
+  }
+
+  discard_button->set_sensitive(true);
+  
+  // Set Check, Bet, Call, Fold button sensitivity
+  check_button->set_sensitive(false);
+  bet_button->set_sensitive(false);
+  call_button->set_sensitive(false);
+  fold_button->set_sensitive(true);
+}
+
 void poker_client::make_json(Player* player)
 {
   comm->send_action(player->get_numDiscards(),

@@ -58,6 +58,8 @@ class poker_client
     
     int num_players;
     int main_player;
+    void bet_sensitivity();
+    void exchange_sensitivity();
 	
   protected:
   

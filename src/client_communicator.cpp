@@ -134,12 +134,12 @@ void client_communicator::message_readin(std::string message)
       // Betting round
       if(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2)
       {
-        
+        client->bet_sensitivity();
       }
       // exchange round
       else if(game_stage == EXCHANGE_ROUND)
       {
-        
+        client->exchange_sensitivity();
       }
     }
   }
