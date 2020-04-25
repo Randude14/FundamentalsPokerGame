@@ -301,7 +301,6 @@ void poker_client::update_client(bool showcards)
         {
           image_file = card_down_file;
         }
-        std::cout << image_file << " at " << j << std::endl;
         card_buttons[j]->set_sensitive(true);
         
         if(cards[j]->property_file() != image_file)
@@ -349,7 +348,6 @@ void poker_client::update_client(bool showcards)
     {
       auto od = opp_displays[od_index];
       
-      std::cerr << "od_index " << od_index << std::endl;
       od->username->set_label(blank_name);
       od->last_action->set_label("");
       od->wallet->set_label("");
@@ -384,7 +382,7 @@ void poker_client::update_client(bool showcards)
   // update turn status
   turn_status->set_label( comm->game_status );
   
-  bet_value_slider->set_range(comm->current_bet, main->get_wallet());
+  //bet_value_slider->set_range(comm->current_bet, main->get_wallet());
   
   
   // enable check button based on the current bet
@@ -436,8 +434,20 @@ void poker_client::on_bet_value_changed()
 {
   int bet_value = bet_value_slider->get_value();
   
-  //assert(bet_value >= comm->current_bet); // can't bet less than the current bet
-  bet_button->set_sensitive( bet_value != 0 );
+  // 
+  if(bet_value >= comm->current_bet)
+  {
+    //assert(bet_value >= comm->current_bet); // can't bet less than the current bet
+    bet_button->set_sensitive( bet_value != 0 );
+    check_button->set_sensitive( comm->current_bet == 0 );
+    call_button->set_sensitive( comm->current_bet != 0 );
+  }
+  else
+  {
+    check_button->set_sensitive(false);
+    bet_button->set_sensitive(false);
+    call_button->set_sensitive(false);
+  }
 }
 
 void poker_client::on_check_click()

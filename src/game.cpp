@@ -27,6 +27,7 @@ Game::Game()
   }
   
   rng = std::default_random_engine( std::time(0) );
+  showcards = false;
 }
 
 Game::~Game() { }
@@ -312,21 +313,21 @@ void Game::bet(double amount)
   Player* current_player = &players[current_turn];
   assert(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2);
   assert( current_player->get_wallet() >= amount && current_player->get_current_bet() == 0);
-  assert( current_bet == 0 );
   agreed = folded + 1;
   
   // get player attributes
   auto wallet = current_player->get_wallet();
   auto p_total_bet = current_player->get_total_bet();
+  double p_current_bet = current_player->get_current_bet();
   
   current_bet = amount;
   
   // only increase the pot by the difference in their last bet, if there was one
   prize_pot += amount;
   // only decrease player wallet by the difference in their last bet, if there was one
-  wallet -= amount;
-  p_total_bet += amount;
-  double p_current_bet = amount;
+  wallet -= (amount - p_current_bet);
+  p_total_bet += (amount - p_current_bet);
+  p_current_bet = amount;
   
   std::string action = current_player->get_name() + " betted " + std::to_string((int)amount) + ".";
   std::cout << action << std::endl;
@@ -575,10 +576,7 @@ void Game::end_game()
     std::cout << game_comment << std::endl;
   }
   
-
-  
-
-  
+  showcards = true;
   std::cout << std::endl << std::endl;
 }
 
@@ -760,6 +758,8 @@ void Game::write_game_state(nlohmann::json& to_player)
   to_player["current_bet"] = current_bet;
   to_player["game_stage"] = game_stage;
   to_player["game_comment"] = game_comment;
+  to_player["showcards"] = showcards;
+  showcards = false;
   
   if(game_stage != IDLE && game_stage != END)
   {

@@ -68,7 +68,7 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   else
   {
     // check this is the correct player
-    //assert( game.is_current_player(uuid) );
+    assert( game.is_current_player(uuid) );
   }
   
   

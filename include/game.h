@@ -75,6 +75,7 @@ class Game
     int game_stage;
     unsigned int agreed;
     unsigned int folded;
+    bool showcards;
     
     // struct used to sort the winner array indexes
     // this is used so that class fields may be called withi

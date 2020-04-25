@@ -64,6 +64,10 @@ void client_communicator::message_readin(std::string message)
   nlohmann::json to_player = nlohmann::json::parse( message );
   
   client->num_players = to_player["player_total"];
+  pot = to_player["player_total"];
+  current_bet = to_player["current_bet"];
+  client->num_players = to_player["player_total"];
+  client->num_players = to_player["player_total"];
   game_status = to_player["game_comment"];
   auto players = client->players;
   
@@ -84,11 +88,6 @@ void client_communicator::message_readin(std::string message)
     if(client->main_uuid == uuid_string)
     {
       client->main_player = i;
-      std::cout << "You are now " << i << " player." << std::endl;
-    }
-    else
-    {
-      std::cout << client->main_uuid << " and " << uuid_string << " do not match." << std::endl;
     }
     
     int total = to_player["players"][i_str]["cards"]["total"];
@@ -130,6 +129,7 @@ void client_communicator::message_readin(std::string message)
     if(current_turn == client->main_player)
     {
       int game_stage = to_player["game_stage"];
+      std::cout << "It's your turn!" << std::endl;
       
       // Betting round
       if(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2)
@@ -144,7 +144,8 @@ void client_communicator::message_readin(std::string message)
     }
   }
   
-  client->update_client();
+  bool showcards = to_player["showcards"];
+  client->update_client(showcards);
 }
 
 void client_communicator::send_action(int cards,
