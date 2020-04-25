@@ -718,7 +718,6 @@ void Game::determine_winners()
     }
   }
   
-  //winner[playersNo] will hold the highest rank
 }
 
 void Game::write_game_state(nlohmann::json& to_player)
