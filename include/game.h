@@ -52,6 +52,8 @@ class Game
     // used to write the game state to the json that goes
     // out to all players    
     void write_game_state(nlohmann::json& to_player);
+    double get_prize_pot();
+    std::vector<Player>& get_players();
     
     bool round_over();                  // Returns when the current round is over
     void next_stage();                  // Called to move from (0) 
@@ -60,12 +62,13 @@ class Game
                                         //                     (3)  Betting round 2 ->
                                         //                     (4)  End
   
-  private:
+ private:
     void determine_winners();            // determine who the winner is...may be more than one player
     std::vector< Player > players;
     std::vector< int > winners;          // list of the winner indexes. Indexes are used to get the referrences from players
     std::vector< Card > deck;
     std::vector< Card > discard_pile;
+    std::string game_comment;            // tells that status of the game
     double prize_pot;
     double current_bet;
     int current_turn;

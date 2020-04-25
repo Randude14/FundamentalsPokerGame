@@ -31,6 +31,16 @@ Game::Game()
 
 Game::~Game() { }
 
+double Game::get_prize_pot()
+{
+  return prize_pot;
+}
+
+std::vector<Player>& Game::get_players()
+{
+  return players;
+}
+
 // /////////////
 // M E T H O D S
 // /////////////
@@ -270,6 +280,10 @@ bool Game::player_join(Player player)
     return false;
   }
   
+  std::string action = player.get_name() + " joined the table.";
+  std::cout << action << std::endl;
+  player.set_action(action);
+  
   // treat player as a folded player
   // player will be ignored until next round
   player.set_folded(true);
@@ -314,6 +328,10 @@ void Game::bet(double amount)
   p_total_bet += amount;
   double p_current_bet = amount;
   
+  std::string action = current_player->get_name() + " betted " + std::to_string((int)amount) + ".";
+  std::cout << action << std::endl;
+  current_player->set_action(action);
+  
   // set player attributes
   current_player->set_current_bet(p_current_bet);
   current_player->set_total_bet(p_total_bet);
@@ -345,6 +363,10 @@ void Game::raise(double amount)
   p_total_bet += (current_bet - p_current_bet);
   p_current_bet = current_bet;
   
+  std::string action = current_player->get_name() + " raised the bet by " + std::to_string((int)amount) + ".";
+  std::cout << action << std::endl;
+  current_player->set_action(action);
+  
   // set player attributes
   current_player->set_current_bet(p_current_bet);
   current_player->set_total_bet(p_total_bet);
@@ -373,6 +395,10 @@ void Game::call()
   p_total_bet += (current_bet - p_current_bet);
   p_current_bet = current_bet;
   
+  std::string action = current_player->get_name() + " called.";
+  std::cout << action << std::endl;
+  current_player->set_action(action);
+  
   // set player attributes
   current_player->set_current_bet(p_current_bet);
   current_player->set_total_bet(p_total_bet);
@@ -389,6 +415,10 @@ void Game::fold()
   Player* current_player = &players[current_turn];
   current_player->set_folded(true);
   
+  std::string action = current_player->get_name() + " folded.";
+  std::cout << action << std::endl;
+  current_player->set_action(action);
+  
   this->next_player();
   // nothing to do with pot...whatever bet the player had was already added
 }
@@ -403,6 +433,7 @@ void Game::exchange(bool to_exchange[NUM_CARDS])
   assert(hand.size() == NUM_CARDS); // double check hand size
   assert( deck.size() >= NUM_CARDS );              // must have enough cards to exchange
   
+  int count = 0;
   for(int i = 0; i < NUM_CARDS; i++)
   {
     // exchange this card
@@ -418,8 +449,13 @@ void Game::exchange(bool to_exchange[NUM_CARDS])
       
       hand[i].value = exchange.value;
       hand[i].suit = exchange.suit;
+      count++;
     }
   }
+  
+  std::string action = current_player->get_name() + " exchanged " + std::to_string(count) + " cards.";
+  std::cout << action << std::endl;
+  current_player->set_action(action);
   
   current_player->set_hand(hand);
   // recaulcate the hand value after exchange
@@ -502,23 +538,47 @@ void Game::end_game()
   game_stage = IDLE;
   determine_winners();
   
+  // a tie between two or more players
   if(winners.size() > 1)
   {
+    game_comment = "We have a tie! ";
     std::cout << "We have a tie!" << std::endl;
-  }
-  
-  // normally this will be divided by 1 but there may be a tie
-  double earnings = prize_pot / winners.size();
-  
-  for(auto& player_index : winners)
-  {
-    Player* winner = &players[player_index];
-    std::cout << winner->get_name() << " has won!" << std::endl;
+    // normally this will be divided by 1 but there may be a tie
+    double earnings = prize_pot / winners.size();
     
-    double wallet = winner->get_wallet();
-    wallet += earnings;
-    winner->set_wallet(wallet);
+    for(auto& player_index : winners)
+    {
+      Player* winner = &players[player_index];
+      game_comment += winner->get_name() + " has won!, ";
+    
+      double wallet = winner->get_wallet();
+      wallet += earnings;
+      winner->set_wallet(wallet);
+    }
+    
+    int length = game_comment.size();
+    game_comment = game_comment.substr(0, length-2);
+    std::cout << game_comment << std::endl;
   }
+  // only one person won
+  else
+  {
+    assert( winners.size() == 1 );
+    // grab player at first index of winners
+    int winner_index = winners[0];
+    Player* winner = &players[ winner_index ];
+    // add prize money to their wallet
+    double wallet = winner->get_wallet();
+    wallet += prize_pot;
+    winner->set_wallet(wallet);
+    
+    game_comment = winner->get_name() + " has won!";
+    std::cout << game_comment << std::endl;
+  }
+  
+
+  
+
   
   std::cout << std::endl << std::endl;
 }
@@ -551,7 +611,6 @@ void Game::next_stage()
   // if there is only one player that has not folded...end game
   if(folded > players.size()-2)
   {
-    std::cout << "Game end   "  << folded << std::endl;
     game_stage = END;
     return;
   }
@@ -585,7 +644,7 @@ void Game::next_player()
     // ignore players that have folded
     while( player->has_folded() );
     
-    
+    game_comment = "Waiting on " + player->get_name();
   }
 }
 
@@ -652,6 +711,7 @@ void Game::determine_winners()
     Player* player = &players[index];
     
     int cmp = compare_hands(top, player);
+    std::cout << top->get_name() << " and " << player->get_name() << std::endl;
     
     if(cmp > 0)
     {
@@ -662,7 +722,6 @@ void Game::determine_winners()
   }
   
   //winner[playersNo] will hold the highest rank
-  //std::cout << winner->get_name() <<" is the winner" << std::endl;
 }
 
 void Game::write_game_state(nlohmann::json& to_player)
@@ -696,4 +755,5 @@ void Game::write_game_state(nlohmann::json& to_player)
   to_player["prize_pot"] = prize_pot;
   to_player["current_bet"] = current_bet;
   to_player["game_stage"] = game_stage;
+  to_player["game_comment"] = game_comment;
 }
