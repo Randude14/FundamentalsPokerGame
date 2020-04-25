@@ -147,6 +147,11 @@ void Player::clear_hand()
   hand.clear();
 }
 
+bool Player::get_bet_status()
+{
+  return has_bet;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // S E T T E R S

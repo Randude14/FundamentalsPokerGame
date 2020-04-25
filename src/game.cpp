@@ -727,22 +727,25 @@ void Game::determine_winners()
 void Game::write_game_state(nlohmann::json& to_player)
 {
   // write player total
-  to_player["player_total"] = 1;
+  to_player["player_total"] = players.size();
   
   // add player info to json
-  for(unsigned int i = 0; i < 1; i++)
+  for(unsigned int i = 0; i < players.size(); i++)
   {
     std::cout << "index " << i << std::endl;
     Player* player = &players[i];
     to_player["players"][i]["name"] = player->get_name();
     to_player["players"][i]["uuid"] = player->get_UUID();
     to_player["players"][i]["wallet"] = player->get_wallet();
-    to_player["players"][i]["this_bet"] = player->get_current_bet();
+    to_player["players"][i]["bet_amount"] = player->get_total_bet();
+    to_player["players"][i]["current_bet"] = player->get_current_bet();
+    to_player["players"][i]["has_bet"] = player->get_bet_status();
     
     auto hand = player->get_hand();
+    to_player["players"][i]["cards"]["total"] = hand.size();
     
     // write player's hand
-    for(int j = 0; j < NUM_CARDS; j++)
+    for(unsigned int j = 0; j < hand.size(); j++)
     {
       std::string hand_string = std::to_string( static_cast<int>(hand[j].suit) );
       hand_string += std::string(" ");
@@ -756,4 +759,11 @@ void Game::write_game_state(nlohmann::json& to_player)
   to_player["current_bet"] = current_bet;
   to_player["game_stage"] = game_stage;
   to_player["game_comment"] = game_comment;
+  
+  if(game_stage != IDLE && game_stage != END)
+  {
+    Player* current_player = &players[current_turn];
+    to_player["current_turn"] = current_turn;
+    to_player["turn_uuid"] = current_player->get_UUID();
+  }
 }

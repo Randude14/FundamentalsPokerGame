@@ -176,7 +176,7 @@ private:
             
             // game just ended.....send game message that the winner was decided
             // then wait 5 seconds to restart the game
-            if( dealer->is_game_idling() )
+            if( dealer->game_ended() )
             {
               to_player.clear();
               std::this_thread::sleep_for( std::chrono::seconds(5) );

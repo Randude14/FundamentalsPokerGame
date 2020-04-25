@@ -140,6 +140,7 @@ int poker_client::run()
   Player* player = players[0];
   player->set_name(playername);
   player->set_wallet(100);
+  main_uuid = player->get_UUID();
   // set default values for player's hand....these will be removed later
   Card c1{Card_value::TEN, Suit::CLUB};
   Card c2{Card_value::JACK, Suit::CLUB};
@@ -209,7 +210,10 @@ int poker_client::run()
   }
   
   // TODO: disable poker_client control buttons
-  update_client();
+  //update_client();
+  
+  player->set_action("join");
+  make_json(player);
   
   // Run the window
   std::string appname = APP_NAME;

@@ -39,6 +39,8 @@ class poker_client
     const std::string APP_NAME{"edu.uta.cse3310.poker.v0_1"};
     const std::string VERSION{"0.1"};
     
+    std::string main_uuid;                     // keep track of the uuid of the main player
+    
     // called when new info is read in from server
     void update_client(bool showcards=false);  
     
@@ -72,6 +74,7 @@ class poker_client
     
     const std::string call_action = "Call";    // used in switching the call/raise button
     const std::string raise_action = "Raise";
+    
     
       // Callbacks for the UI widgets for the player
     

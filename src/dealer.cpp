@@ -11,7 +11,10 @@
 // C O N S T R U C T O R S / D E S T R U C T O R S
 // ///////////////////////////////////////////////
 
-Dealer::Dealer() { }
+Dealer::Dealer() 
+{ 
+  ended = false;
+}
 
 Dealer::~Dealer() { }
 
@@ -21,15 +24,16 @@ Dealer::~Dealer() { }
 // M E T H O D S
 // /////////////
 
-bool Dealer::is_game_idling()
+bool Dealer::game_ended()
 {
-  return game.is_idle();
+  return ended;
 }
 
 void Dealer::restart_game(nlohmann::json& to_player)
 {
   game.start_game(); // start game again
   game.write_game_state(to_player);
+  ended = false;
 }
 
 void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
@@ -39,8 +43,8 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   std::string name = to_dealer["from"]["name"];
   
   std::cout << name << " invoked " << event << std::endl;
-  // used to flag that only the game state info should be sent
-  // should only be set to true when a player joins
+  
+  // COMMENTED OUT FOR TESTING
   
   // new player has joined the game
   if(event == "join")
@@ -59,10 +63,10 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   else
   {
     // check this is the correct player
-    assert( game.is_current_player(uuid) );
+    //assert( game.is_current_player(uuid) );
   }
   
-  
+  /*
   // player actions
   if(event == "check")
   {
@@ -101,7 +105,8 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   {
     std::cout << "Game is over."  << std::endl; 
     game.end_game();      // call end game
-  }
+    ended = true;
+  }*/
   
   game.write_game_state( to_player );
 }

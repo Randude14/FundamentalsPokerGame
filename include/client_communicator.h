@@ -4,6 +4,7 @@
 
 #include "player.h"
 #include "dealer.h"
+#include "game.h"
 #include "poker_client.h"
 
 #include <iostream>

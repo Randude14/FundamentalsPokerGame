@@ -25,7 +25,8 @@ class Dealer
            // Called when the exchange round is began, players may exchange unwanted cards here
     void process(nlohmann::json& to_dealer, nlohmann::json& to_player);
     
-    bool is_game_idling(); // signal that the game is over
+    bool ended;
+    bool game_ended(); // signal that the game is over
     void restart_game(nlohmann::json& to_player);
 
   private:

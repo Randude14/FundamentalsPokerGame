@@ -73,12 +73,21 @@ void client_communicator::message_readin(std::string message)
     std::string uuid_string = to_player["players"][i]["uuid"];
     player->set_UUID(uuid_string);
     player->set_wallet(to_player["players"][i]["wallet"]);
-    player->set_name(to_player["players"][i]["name"]);
     player->set_total_bet(to_player["players"][i]["bet_amount"]);
+    player->set_current_bet(to_player["players"][i]["current_bet"]);
     player->set_bet_status(to_player["players"][i]["has_bet"]);
     
-    for(int j = 0; j < NUM_CARDS; j++)
+    // set main player in table
+    if(client->main_uuid == uuid_string)
     {
+      client->main_player = i;
+    }
+    
+    int total = to_player["players"][i]["cards"]["total"];
+    
+    for(int j = 0; j < total; j++)
+    {
+      
       std::string hand_string = to_player["players"][i]["cards"][j];
       unsigned int index = hand_string.find(' ');
       assert(index != std::string::npos);
@@ -91,11 +100,38 @@ void client_communicator::message_readin(std::string message)
         auto suit = static_cast<Suit>(suit_t);
         auto value = static_cast<Card_value>(value_t);
         Card card(value, suit);
+        player->clear_hand();
         player->add_to_hand(card);
       }
       catch(std::exception& ex)
       {
         std::cout << "Error processing: " << hand_string << std::endl;
+      }
+    }
+  }
+  
+  
+  /// ********************* ROBBIE HERE ******************************
+  
+  
+  if(to_player.contains("current_turn") && to_player.contains("turn_uuid"))
+  {
+    int current_turn = to_player["current_turn"];
+    
+    // it's this players turn to do something...
+    if(current_turn == client->main_player)
+    {
+      int game_stage = to_player["game_stage"];
+      
+      // Betting round
+      if(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2)
+      {
+        
+      }
+      // exchange round
+      else if(game_stage == EXCHANGE_ROUND)
+      {
+        
       }
     }
   }
