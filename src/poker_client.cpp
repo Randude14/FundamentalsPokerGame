@@ -451,6 +451,7 @@ void poker_client::on_check_click()
   player->set_action("check");
   player->set_total_bet(0.0);
   make_json(player);
+  update_client();
 }
 
 void poker_client::on_bet_click()
@@ -463,6 +464,7 @@ void poker_client::on_bet_click()
   player->set_action("bet");
   player->set_total_bet(bet_value_slider->get_value());
   make_json(player);
+  update_client();
 }
 
 void poker_client::on_call_click()
@@ -474,6 +476,7 @@ void poker_client::on_call_click()
   player->set_action("call");
   player->set_total_bet(bet_value_slider->get_value());
   make_json(player);
+  update_client();
 }
 
 void poker_client::on_fold_click()
@@ -484,6 +487,7 @@ void poker_client::on_fold_click()
   player->set_action("fold");
   player->set_folded(true);
   make_json(player);
+  update_client();
 }
 
 void poker_client::on_discard_click()
@@ -492,6 +496,7 @@ void poker_client::on_discard_click()
   player->set_message("Give me x cards");
   player->set_action("exchange");
   make_json(player);
+  update_client();
 }
 
 void poker_client::bet_sensitivity()
