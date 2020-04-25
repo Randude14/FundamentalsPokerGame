@@ -437,7 +437,7 @@ void Game::exchange(bool to_exchange[NUM_CARDS])
   for(int i = 0; i < NUM_CARDS; i++)
   {
     // exchange this card
-    if(to_exchange[i])
+    if( to_exchange[i] )
     {
       // discard this card and draw from the top of the deck
       Card discard = hand[i];
@@ -456,7 +456,6 @@ void Game::exchange(bool to_exchange[NUM_CARDS])
   std::string action = current_player->get_name() + " exchanged " + std::to_string(count) + " cards.";
   std::cout << action << std::endl;
   current_player->set_action(action);
-  
   current_player->set_hand(hand);
   // recaulcate the hand value after exchange
   this->calculate_handvalue(current_player);
@@ -732,17 +731,18 @@ void Game::write_game_state(nlohmann::json& to_player)
   // add player info to json
   for(unsigned int i = 0; i < players.size(); i++)
   {
-    std::cout << "index " << i << std::endl;
     Player* player = &players[i];
-    to_player["players"][i]["name"] = player->get_name();
-    to_player["players"][i]["uuid"] = player->get_UUID();
-    to_player["players"][i]["wallet"] = player->get_wallet();
-    to_player["players"][i]["bet_amount"] = player->get_total_bet();
-    to_player["players"][i]["current_bet"] = player->get_current_bet();
-    to_player["players"][i]["has_bet"] = player->get_bet_status();
+    std::string i_str = std::to_string(i);
+    to_player["players"][i_str]["name"] = player->get_name();
+    to_player["players"][i_str]["uuid"] = player->get_UUID();
+    to_player["players"][i_str]["wallet"] = player->get_wallet();
+    to_player["players"][i_str]["bet_amount"] = player->get_total_bet();
+    to_player["players"][i_str]["current_bet"] = player->get_current_bet();
+    to_player["players"][i_str]["action"] = player->get_action();
+    to_player["players"][i_str]["has_bet"] = player->get_bet_status();
     
     auto hand = player->get_hand();
-    to_player["players"][i]["cards"]["total"] = hand.size();
+    to_player["players"][i_str]["cards"]["total"] = hand.size();
     
     // write player's hand
     for(unsigned int j = 0; j < hand.size(); j++)
@@ -750,7 +750,8 @@ void Game::write_game_state(nlohmann::json& to_player)
       std::string hand_string = std::to_string( static_cast<int>(hand[j].suit) );
       hand_string += std::string(" ");
       hand_string += std::to_string(static_cast<int>(hand[j].value));
-      to_player["players"][i]["cards"][j] = hand_string;
+      std::string j_str = std::to_string(j);
+      to_player["players"][i_str]["cards"][j_str] = hand_string;
     }
   }
   

@@ -40,7 +40,7 @@ class client_communicator
     void client_run();                                 // runs async waiting for data to be read from dealer/server
     void asio_run(std::string host, std::string port); // runs the io context to read the data
     void message_readin(std::string);                  // message is read in from chat_client
-    
+    std::string game_status;           // current game status   
     void send_message();
   
   private:
@@ -60,7 +60,8 @@ class client_communicator
                                       std::string event,
                                       std::string uuid,
                                       std::string name,
-                                      double tot_bet);   // write message to chat_client
+                                      double tot_bet,
+                                      bool discards[NUM_CARDS]);   // write message to chat_client
 };
 
 using asio::ip::tcp;

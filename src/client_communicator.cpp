@@ -64,31 +64,40 @@ void client_communicator::message_readin(std::string message)
   nlohmann::json to_player = nlohmann::json::parse( message );
   
   client->num_players = to_player["player_total"];
+  game_status = to_player["game_comment"];
   auto players = client->players;
   
   for(int i = 0; i < client->num_players; i++)
   {
+    std::string i_str = std::to_string(i);
     Player* player = players[i];
-    player->set_name(to_player["players"][i]["name"]);
-    std::string uuid_string = to_player["players"][i]["uuid"];
+    player->set_name(to_player["players"][i_str]["name"]);
+    std::string uuid_string = to_player["players"][i_str]["uuid"];
     player->set_UUID(uuid_string);
-    player->set_wallet(to_player["players"][i]["wallet"]);
-    player->set_total_bet(to_player["players"][i]["bet_amount"]);
-    player->set_current_bet(to_player["players"][i]["current_bet"]);
-    player->set_bet_status(to_player["players"][i]["has_bet"]);
+    player->set_wallet(to_player["players"][i_str]["wallet"]);
+    player->set_total_bet(to_player["players"][i_str]["bet_amount"]);
+    player->set_current_bet(to_player["players"][i_str]["current_bet"]);
+    player->set_bet_status(to_player["players"][i_str]["has_bet"]);
+    player->set_action(to_player["players"][i_str]["action"]);
     
     // set main player in table
     if(client->main_uuid == uuid_string)
     {
       client->main_player = i;
+      std::cout << "You are now " << i << " player." << std::endl;
+    }
+    else
+    {
+      std::cout << client->main_uuid << " and " << uuid_string << " do not match." << std::endl;
     }
     
-    int total = to_player["players"][i]["cards"]["total"];
+    int total = to_player["players"][i_str]["cards"]["total"];
+    player->clear_hand();
     
     for(int j = 0; j < total; j++)
     {
-      
-      std::string hand_string = to_player["players"][i]["cards"][j];
+      std::string j_str = std::to_string(j);
+      std::string hand_string = to_player["players"][i_str]["cards"][j_str];
       unsigned int index = hand_string.find(' ');
       assert(index != std::string::npos);
       
@@ -100,7 +109,6 @@ void client_communicator::message_readin(std::string message)
         auto suit = static_cast<Suit>(suit_t);
         auto value = static_cast<Card_value>(value_t);
         Card card(value, suit);
-        player->clear_hand();
         player->add_to_hand(card);
       }
       catch(std::exception& ex)
@@ -145,7 +153,8 @@ void client_communicator::send_action(int cards,
                                       std::string event,
                                       std::string uuid,
                                       std::string name,
-                                      double tot_bet)
+                                      double tot_bet,
+                                      bool discards[NUM_CARDS])
 {
   nlohmann::json to_dealer;
   to_dealer["cards_requested"] = cards;
@@ -154,6 +163,12 @@ void client_communicator::send_action(int cards,
   to_dealer["event"] = event;
   to_dealer["from"] = { {"uuid",uuid} , {"name",name} };
   to_dealer["total_bet"] = tot_bet;
+  
+  for(unsigned int i = 0; i < NUM_CARDS; i++)
+  {
+    std::string i_str = std::to_string(i);
+    to_dealer["discards"][i_str] = discards[i];
+  }
 
   std::string t = to_dealer.dump();
   

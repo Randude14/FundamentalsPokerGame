@@ -141,6 +141,7 @@ int poker_client::run()
   player->set_name(playername);
   player->set_wallet(100);
   main_uuid = player->get_UUID();
+  std::cout << "main uuid: " << main_uuid << std::endl;
   player->set_message("Player joined");
   player->set_action("join");
   
@@ -214,9 +215,6 @@ int poker_client::run()
     GET_WIDGET(player + std::string("last_action"), opp_display->last_action)
   }
   
-  // TODO: disable poker_client control buttons
-  //update_client();
-  
   // Run the window
   std::string appname = APP_NAME;
   appname += std::string(".") + playername;
@@ -273,7 +271,13 @@ std::string poker_client::get_card_file(Card card)
 
 void poker_client::update_client(bool showcards)
 {
+  update_lock.lock();
   int od_index = 0;
+  
+  for(int i = 0; i <NUM_CARDS; i++)
+  {
+    discards[i] = false;
+  }
   
   for(int i = 0; i < MAX_PLAYERS; i++) // update opponents info
   {
@@ -283,44 +287,69 @@ void poker_client::update_client(bool showcards)
       Player* player = players[ main_player ];
       
       username->set_label(player->get_name()); // update username
+      
+      auto hand = player->get_hand();
   
-      for(int j = 0; j < NUM_CARDS; j++) // update cards
+      for(unsigned int j = 0; j < NUM_CARDS; j++) // update cards
       {
-        std::string image_file = get_card_file(player->get_card(j));
-        // only update image file when needed
-        if(image_file != cards[j]->property_file())
+        std::string image_file;
+        if(j < hand.size())
+        {
+          image_file = get_card_file(hand[j]);
+        }
+        else
+        {
+          image_file = card_down_file;
+        }
+        std::cout << image_file << " at " << j << std::endl;
+        card_buttons[j]->set_sensitive(true);
+        
+        if(cards[j]->property_file() != image_file)
         {
           cards[j]->set(image_file);
         }
-        card_buttons[j]->set_sensitive(true);
       } 
     }
     
     // update opponent's info
     else if(i < num_players)
     {
-      auto od = opp_displays[od_index++];
+      auto od = opp_displays[od_index];
       Player* opp = players[i];
 
       od->username->set_label(opp->get_name());
+      od->last_action->set_label( opp->get_action() );
       
+      auto hand = opp->get_hand();
       
-      
-      for(int j = 0; j < NUM_CARDS; j++) // update cards
+      for(unsigned int j = 0; j < NUM_CARDS; j++) // update cards
       {
-        std::string image_file = (showcards) ? get_card_file(opp->get_card(j)) : card_down_file;
+        std::string image_file;
+
+        if(j < hand.size())
+        {
+          image_file = (showcards) ? get_card_file(hand[j]) : card_down_file;
+        }
+        else
+        {
+          image_file = card_down_file;
+        }
+        
         if(image_file != od->cards[j]->property_file())
         {
           od->cards[j]->set(image_file);
         }
-      }   
+      }
+
+      od_index++;
     }
     
     // this means we are beyond amount of players...fill in with blank info
     else
     {
-      auto od = opp_displays[od_index++];
+      auto od = opp_displays[od_index];
       
+      std::cerr << "od_index " << od_index << std::endl;
       od->username->set_label(blank_name);
       od->last_action->set_label("");
       od->wallet->set_label("");
@@ -332,6 +361,8 @@ void poker_client::update_client(bool showcards)
           od->cards[j]->set(image_file);
         }
       }  
+      
+      od_index++;
     }
   }
   
@@ -350,6 +381,9 @@ void poker_client::update_client(bool showcards)
   sprintf(buffer, current_bet_label_format, comm->current_bet);
   current_bet_label->set_label(buffer);
   
+  // update turn status
+  turn_status->set_label( comm->game_status );
+  
   bet_value_slider->set_range(comm->current_bet, main->get_wallet());
   
   
@@ -359,6 +393,7 @@ void poker_client::update_client(bool showcards)
   bet_button->set_sensitive( 0 );
   
   main_window->queue_draw();
+  update_lock.unlock();
 }
 
 
@@ -370,9 +405,11 @@ void poker_client::update_client(bool showcards)
 void  poker_client::on_hand_click_##NUM()                       \
 {                                                               \
   std::cout << "Hand " << NUM << " was clicked!" << std::endl;  \
+  Player* player = players[ main_player ];                      \
+  if( player->get_hand().size() < NUM) { return; }              \
+                                                                \
   if(cards[NUM-1]->property_file() == card_down_file)           \
   {                                                             \
-    Player* player = players[ main_player ];                    \
     Card card = player->get_card(NUM-1);                        \
     std::string image = get_card_file(card);                    \
     cards[NUM-1]->set(image);                                   \
@@ -381,11 +418,11 @@ void  poker_client::on_hand_click_##NUM()                       \
   }                                                             \
   else                                                          \
   {                                                             \
-    Player* player = players[ main_player ];                    \
     cards[NUM-1]->set(card_down_file);                          \
     player->discard(NUM-1, false);                              \
     player->decr_numDiscards();                                 \
   }                                                             \
+  discards[NUM-1] = ! discards[NUM-1];                          \
 }
 
 HAND_CLICK_METHODS(1)
@@ -465,5 +502,6 @@ void poker_client::make_json(Player* player)
                     player->get_action(),
                     player->get_UUID(),
                     player->get_name(),
-                    player->get_total_bet());
+                    player->get_total_bet(),
+                    discards);
 }

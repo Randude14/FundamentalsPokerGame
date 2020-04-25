@@ -72,6 +72,7 @@ class Player
     double wallet;
     std::vector<Card> hand;
     std::array<bool, NUM_CARDS> discards;
+    char exchanged[5];
     bool folded;
     double this_bet;
     double total_bet;

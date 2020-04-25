@@ -4,9 +4,11 @@
 #include "card.h"
 #include "player.h"
 #include "client_communicator.h"
+#include "game.h"
 #include <gtkmm.h>
 #include <string>
 #include <vector>
+#include <thread>
 
 /*
  * Player class which acts as client and is driven by user input
@@ -109,6 +111,7 @@ class poker_client
     Gtk::Button *discard_button;
     Gtk::Label *username;
     Gtk::Label *turn_status;
+    std::mutex update_lock;
     
     // formats for the pot and current_labels
     const char* pot_label_format = "Pot: %.0f";
@@ -119,6 +122,7 @@ class poker_client
     Gtk::Label *pot_label;
     Gtk::Label *current_bet_label;
     Gtk::Label *wallet_label;
+    bool discards[NUM_CARDS];
     
     Gtk::Button *card_buttons[NUM_CARDS]; // buttons for the player cards
     Gtk::Image *cards[NUM_CARDS];         // images for the player cards

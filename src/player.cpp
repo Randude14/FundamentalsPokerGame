@@ -43,6 +43,7 @@ Player::Player(const Player& other)
   this->message = other.message;
   this->this_bet = other.this_bet;
   this->total_bet = other.total_bet;
+  this->UUID = other.UUID;
   this->hand.clear();
   for(unsigned int i = 0; i < other.hand.size(); i++)
   {
@@ -60,12 +61,12 @@ Player& Player::operator=(const Player& other)
   this->message = other.message;
   this->this_bet = other.this_bet;
   this->total_bet = other.total_bet;
+  this->UUID = other.UUID;
   this->hand.clear();
   for(unsigned int i = 0; i < other.hand.size(); i++)
   {
     this->hand.push_back(other.hand[i]);
   }
-  
   return *this;
 }
 

@@ -56,7 +56,12 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
     
     if(game.player_join(player))
     {
-      std::cout << "Player " << name << " joined." << std::endl;
+      std::cout << "Player " << name << " with " << uuid << " joined." << std::endl;
+    }
+    
+    if( game.min_players() )
+    {
+      game.start_game();
     }
   }
   // player inputs from a player currently in the game
@@ -66,7 +71,7 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
     //assert( game.is_current_player(uuid) );
   }
   
-  /*
+  
   // player actions
   if(event == "check")
   {
@@ -90,6 +95,13 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
   {
     // TODO: replace later with json info
     bool to_exchange[NUM_CARDS] = {false};
+    
+    for(int i = 0; i < NUM_CARDS; i++)
+    {
+      std::string i_str = std::to_string(i);
+      to_exchange[i] = to_dealer["discards"][i_str];
+    }
+    
     game.exchange(to_exchange);
   }  
   
@@ -106,7 +118,7 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
     std::cout << "Game is over."  << std::endl; 
     game.end_game();      // call end game
     ended = true;
-  }*/
+  }
   
   game.write_game_state( to_player );
 }
