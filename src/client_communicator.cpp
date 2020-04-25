@@ -142,6 +142,10 @@ void client_communicator::message_readin(std::string message)
         client->exchange_sensitivity();
       }
     }
+    else
+    {
+      client->reset_sensitivity();
+    }
   }
   
   bool showcards = to_player["showcards"];

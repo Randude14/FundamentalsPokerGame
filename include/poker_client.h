@@ -56,10 +56,12 @@ class poker_client
     // player list
     Player* players[MAX_PLAYERS];
     
-    int num_players;
-    int main_player;
-    void bet_sensitivity();
-    void exchange_sensitivity();
+    int num_players; // number of players in game
+    int main_player; // index of main player
+    
+    void bet_sensitivity();      // sensitivity for betting round
+    void exchange_sensitivity(); // sensitivity for exchange round
+    void reset_sensitivity();                  // Reset button sensitivity based on game state
 	
   protected:
   
@@ -131,7 +133,6 @@ class poker_client
     // End referrences
     
     std::string get_card_file(Card card);      // get card image file from card
-    void reset_sensitivity();                  // Reset button sensitivity based on game state
 
 };
 

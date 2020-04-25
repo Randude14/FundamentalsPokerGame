@@ -141,7 +141,6 @@ int poker_client::run()
   player->set_name(playername);
   player->set_wallet(100);
   main_uuid = player->get_UUID();
-  std::cout << "main uuid: " << main_uuid << std::endl;
   player->set_message("Player joined");
   player->set_action("join");
   
@@ -382,13 +381,7 @@ void poker_client::update_client(bool showcards)
   // update turn status
   turn_status->set_label( comm->game_status );
   
-  //bet_value_slider->set_range(comm->current_bet, main->get_wallet());
-  
-  
-  // enable check button based on the current bet
-  check_button->set_sensitive( comm->current_bet == 0 );
-  call_button->set_sensitive( comm->current_bet != 0 );
-  bet_button->set_sensitive( 0 );
+  bet_value_slider->set_range(comm->current_bet, main->get_wallet());
   
   main_window->queue_draw();
   update_lock.unlock();
@@ -402,7 +395,6 @@ void poker_client::update_client(bool showcards)
 #define HAND_CLICK_METHODS(NUM)                                 \
 void  poker_client::on_hand_click_##NUM()                       \
 {                                                               \
-  std::cout << "Hand " << NUM << " was clicked!" << std::endl;  \
   Player* player = players[ main_player ];                      \
   if( player->get_hand().size() < NUM) { return; }              \
                                                                 \
@@ -433,21 +425,7 @@ HAND_CLICK_METHODS(5)
 void poker_client::on_bet_value_changed()
 {
   int bet_value = bet_value_slider->get_value();
-  
-  // 
-  if(bet_value >= comm->current_bet)
-  {
-    //assert(bet_value >= comm->current_bet); // can't bet less than the current bet
-    bet_button->set_sensitive( bet_value != 0 );
-    check_button->set_sensitive( comm->current_bet == 0 );
-    call_button->set_sensitive( comm->current_bet != 0 );
-  }
-  else
-  {
-    check_button->set_sensitive(false);
-    bet_button->set_sensitive(false);
-    call_button->set_sensitive(false);
-  }
+  bet_button->set_sensitive( bet_value != 0 );
 }
 
 void poker_client::on_check_click()
@@ -461,6 +439,7 @@ void poker_client::on_check_click()
   player->set_action("check");
   player->set_total_bet(0.0);
   make_json(player);
+  reset_sensitivity();
 }
 
 void poker_client::on_bet_click()
@@ -473,6 +452,7 @@ void poker_client::on_bet_click()
   player->set_action("bet");
   player->set_total_bet(bet_value_slider->get_value());
   make_json(player);
+  reset_sensitivity();
 }
 
 void poker_client::on_call_click()
@@ -484,6 +464,7 @@ void poker_client::on_call_click()
   player->set_action("call");
   player->set_total_bet(bet_value_slider->get_value());
   make_json(player);
+  reset_sensitivity();
 }
 
 void poker_client::on_fold_click()
@@ -494,6 +475,7 @@ void poker_client::on_fold_click()
   player->set_action("fold");
   player->set_folded(true);
   make_json(player);
+  reset_sensitivity();
 }
 
 void poker_client::on_discard_click()
@@ -502,6 +484,22 @@ void poker_client::on_discard_click()
   player->set_message("Give me x cards");
   player->set_action("exchange");
   make_json(player);
+  reset_sensitivity();
+}
+
+void poker_client::reset_sensitivity()
+{
+  for(int idx = 0; idx < NUM_CARDS; idx++)
+  {
+    card_buttons[idx]->set_sensitive(false);
+  }
+
+  discard_button->set_sensitive(false);
+  check_button->set_sensitive(false);
+  bet_button->set_sensitive(false);
+  call_button->set_sensitive(false);
+  fold_button->set_sensitive(false); 
+  bet_value_slider->set_sensitive(false);
 }
 
 void poker_client::bet_sensitivity()
@@ -515,20 +513,11 @@ void poker_client::bet_sensitivity()
   discard_button->set_sensitive(false);
   
   // Set Check, Bet, Call, Fold button sensitivity
-  if(comm->current_bet > 0.0)
-  {
-    check_button->set_sensitive(false);
-  }
-  
-  bet_button->set_sensitive(true);
-  
-  if(players[main_player]->get_current_bet() < comm->current_bet)
-  {
-    call_button->set_sensitive(true);
-  }
-  
+  check_button->set_sensitive( comm->current_bet == 0 );
+  bet_button->set_sensitive(false);
+  call_button->set_sensitive( comm->current_bet > 0 );
   fold_button->set_sensitive(true);
-
+  bet_value_slider->set_sensitive(true);
 }
 
 void poker_client::exchange_sensitivity()
@@ -545,7 +534,8 @@ void poker_client::exchange_sensitivity()
   check_button->set_sensitive(false);
   bet_button->set_sensitive(false);
   call_button->set_sensitive(false);
-  fold_button->set_sensitive(true);
+  fold_button->set_sensitive(false);
+  bet_value_slider->set_sensitive(false);
 }
 
 void poker_client::make_json(Player* player)
