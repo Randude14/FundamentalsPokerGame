@@ -443,6 +443,11 @@ bool Game::is_idle()
 
 bool Game::is_current_player(std::string& UUID)
 {
+  if( players.empty() )
+  {
+    return false;
+  }
+  
   Player* current_player = &players[current_turn];
   
   return ( UUID == current_player->get_UUID() );
