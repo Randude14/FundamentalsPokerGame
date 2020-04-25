@@ -7,11 +7,14 @@
 
 void print_game(Game& game)
 {
-  std::cout << "Prize Pot: " << game.prize_pot << std::endl;
-  std::cout << "Player size: " << game.players.size() << std::endl << "---------" << std::endl;
-  for(unsigned int i = 0; i < game.players.size(); i++)
+  std::cout << "Prize Pot: " << game.get_prize_pot() << std::endl;
+  
+  auto players = game.get_players();
+  
+  std::cout << "Player size: " << players.size() << std::endl << "---------" << std::endl;
+  for(unsigned int i = 0; i < players.size(); i++)
   {
-    Player* player = &game.players.at(i);
+    Player* player = &players.at(i);
     std::cout << "Name: " << player->get_name() << std::endl;
     std::cout << "Wallet: " << player->get_wallet() << std::endl;
     std::cout << "Folded: " << player->has_folded() << std::endl;
@@ -88,7 +91,6 @@ int main(int argc, char* argv[])
     game.next_stage();
     game.check();
     game.bet(10);
-    game.raise(20);
     game.call();
     game.call();
     
@@ -101,6 +103,8 @@ int main(int argc, char* argv[])
     
     game.end_game();
   }
+  
+  print_game( game );
   
   return 0;
 }

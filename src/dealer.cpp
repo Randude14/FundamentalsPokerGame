@@ -11,10 +11,7 @@
 // C O N S T R U C T O R S / D E S T R U C T O R S
 // ///////////////////////////////////////////////
 
-Dealer::Dealer()
-{
-  
-}
+Dealer::Dealer() { }
 
 Dealer::~Dealer() { }
 
