@@ -87,6 +87,10 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
     double amount = to_dealer["current_bet"];
     game.raise(amount);
   }
+  else if(event == "call")
+  {
+    game.call();
+  }
   else if(event == "fold")
   {
     game.fold();

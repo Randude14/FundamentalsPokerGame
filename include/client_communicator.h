@@ -4,12 +4,12 @@
 
 #include "player.h"
 #include "dealer.h"
-#include "game.h"
 #include "poker_client.h"
 
 #include <iostream>
 #include <thread>
 
+#include <gtkmm.h>
 #include <cstdlib>
 #include <deque>
 #include <vector>
@@ -40,20 +40,29 @@ class client_communicator
     void client_run();                                 // runs async waiting for data to be read from dealer/server
     void asio_run(std::string host, std::string port); // runs the io context to read the data
     void message_readin(std::string);                  // message is read in from chat_client
+    bool update_found();               // return if an udpate has come in
+    bool client_turn();                // return if it's this clients turn
+    bool show_cards();
+    int game_stage();                  // return game stage
     std::string game_status;           // current game status   
     void send_message();
   
   private:
     
     std::string turn_status;           // message indicating who the dealer is waiting on
-    long pot;                          // current pot of the game
-    long current_bet;                  // current bet of the game, can be 0 for "check" 
+    double pot;                          // current pot of the game
+    double current_bet;                  // current bet of the game, can be 0 for "check" 
     poker_client* client;              // client this communicator is tied to
     
     bool failed;                       // flag to signal connection failed
+    bool update;                 // signal to client that an update has come in
+    bool showcards;                    // whether cards should be shown
+    bool player_turn;                  // signal if it's this client's turn
+    int round;
     chat_client* comm;                 // this will connect with the dealer/server
     asio::io_context io_context;
     std::thread* comm_t;               // thread to run the asio and chat_client
+    std::mutex update_lock;            // mutex for updates
     void send_action(int cards,
                                       std::string chat,
                                       double curr_bet,

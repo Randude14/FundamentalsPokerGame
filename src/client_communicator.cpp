@@ -61,13 +61,13 @@ void client_communicator::asio_run(std::string host, std::string port)
 
 void client_communicator::message_readin(std::string message)
 {
+  update_lock.lock();
   nlohmann::json to_player = nlohmann::json::parse( message );
   
   client->num_players = to_player["player_total"];
-  pot = to_player["player_total"];
+  pot = to_player["prize_pot"];
+  std::cout << "Current Pot: " << pot << std::endl;
   current_bet = to_player["current_bet"];
-  client->num_players = to_player["player_total"];
-  client->num_players = to_player["player_total"];
   game_status = to_player["game_comment"];
   auto players = client->players;
   
@@ -117,10 +117,6 @@ void client_communicator::message_readin(std::string message)
     }
   }
   
-  
-  /// ********************* ROBBIE HERE ******************************
-  
-  
   if(to_player.contains("current_turn") && to_player.contains("turn_uuid"))
   {
     int current_turn = to_player["current_turn"];
@@ -128,28 +124,47 @@ void client_communicator::message_readin(std::string message)
     // it's this players turn to do something...
     if(current_turn == client->main_player)
     {
-      int game_stage = to_player["game_stage"];
+      round = to_player["game_stage"];
       std::cout << "It's your turn!" << std::endl;
-      
-      // Betting round
-      if(game_stage == BET_ROUND_1 || game_stage == BET_ROUND_2)
-      {
-        client->bet_sensitivity();
-      }
-      // exchange round
-      else if(game_stage == EXCHANGE_ROUND)
-      {
-        client->exchange_sensitivity();
-      }
+      player_turn = true;
     }
     else
     {
-      client->reset_sensitivity();
+      player_turn = false;
     }
   }
   
-  bool showcards = to_player["showcards"];
-  client->update_client(showcards);
+  showcards = to_player["showcards"];
+  update = true;
+  update_lock.unlock();
+}
+
+bool client_communicator::update_found()
+{
+  bool res = false;
+  update_lock.lock();
+  if(update)
+  {
+    update = false;
+    res = true;
+  }
+  update_lock.unlock();
+  return res;
+}
+
+bool client_communicator::client_turn()
+{
+  return player_turn;
+}
+
+bool client_communicator::show_cards()
+{
+  return showcards;
+}
+
+int client_communicator::game_stage()
+{
+  return round;
 }
 
 void client_communicator::send_action(int cards,

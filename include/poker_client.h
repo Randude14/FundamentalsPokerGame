@@ -3,6 +3,7 @@
 
 #include "card.h"
 #include "player.h"
+#include "game.h"
 #include "client_communicator.h"
 #include "game.h"
 #include <gtkmm.h>
@@ -52,6 +53,8 @@ class poker_client
     
     void close(); // called when client window closes
     void connection_failed();
+    
+    bool idle_handler(); // called by glib when nothing else is happening
     
     // player list
     Player* players[MAX_PLAYERS];
@@ -121,6 +124,7 @@ class poker_client
     const char* pot_label_format = "Pot: %.0f";
     const char* current_bet_label_format = "Current Bet: %.0f";
     const char* wallet_label_format = "Wallet: %.0f";
+    bool closing;
     
     // pot and current_bet labels
     Gtk::Label *pot_label;

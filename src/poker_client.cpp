@@ -1,6 +1,7 @@
 #include <gtkmm.h>
 #include <iostream>
 #include <signal.h>
+#include <X11/Xlib.h>
 
 #include "poker_client.h"
 #include "play_window.h"
@@ -84,7 +85,6 @@ int poker_client::run()
   }
    
   // if play was clicked, continue as is....
-  
   std::cout << "Starting the " << APP_TITLE << " client for version " << VERSION << "...." << std::endl;
   
   // Create the builder
@@ -120,6 +120,7 @@ int poker_client::run()
   std::string window_title = APP_TITLE;
   window_title += std::string("   ") + playername;
   main_window->set_title(window_title);  
+  closing = true;
   
   // create communicator
   comm = new client_communicator(this, host, port);
@@ -218,6 +219,8 @@ int poker_client::run()
   std::string appname = APP_NAME;
   appname += std::string(".") + playername;
   auto main_app = Gtk::Application::create(appname);
+  Glib::signal_idle().connect( sigc::mem_fun(*this, &poker_client::idle_handler) );
+  XInitThreads();
   int ret = main_app->run(*main_window);
   
   this->close();
@@ -230,6 +233,7 @@ int poker_client::run()
 // ***** CLOSE CLIENT **********
 void poker_client::close()
 {
+  closing = true;
   if(comm)
   {
     comm->close();
@@ -265,6 +269,33 @@ std::string poker_client::get_card_file(Card card)
   image_file += ".png";   
   
   return image_file;
+}
+
+bool poker_client::idle_handler()
+{
+  // found an update from dealer
+  if(comm->update_found())
+  {
+    // signal it's this clients turn
+    if(comm->client_turn())
+    {
+      // set gui sensitivity based on the round
+      int round = comm->game_stage();
+      if(round == BET_ROUND_1 || round == BET_ROUND_2)
+      {
+        this->bet_sensitivity();
+      }
+      else if(round == EXCHANGE_ROUND)
+      {
+        this->exchange_sensitivity();
+      }
+    }
+    
+    bool showcards = comm->show_cards();
+    this->update_client(showcards);
+  }
+  
+  return closing;
 }
 
 
@@ -365,6 +396,7 @@ void poker_client::update_client(bool showcards)
   
   char buffer[50]; // used to format labels...
   Player* main = players[ main_player ];
+  std::cerr << "Main player: " << main_player << std::endl;
   
   // update wallet label
   sprintf(buffer, wallet_label_format, main->get_wallet());
@@ -381,7 +413,10 @@ void poker_client::update_client(bool showcards)
   // update turn status
   turn_status->set_label( comm->game_status );
   
-  bet_value_slider->set_range(comm->current_bet, main->get_wallet());
+  auto current_bet = comm->current_bet;
+  auto wallet = main->get_wallet();
+  bet_value_slider->set_range(current_bet, wallet);
+  bet_value_slider->set_value(current_bet);
   
   main_window->queue_draw();
   update_lock.unlock();
@@ -425,7 +460,7 @@ HAND_CLICK_METHODS(5)
 void poker_client::on_bet_value_changed()
 {
   int bet_value = bet_value_slider->get_value();
-  bet_button->set_sensitive( bet_value != 0 );
+  bet_button->set_sensitive( bet_value > comm->current_bet  );
 }
 
 void poker_client::on_check_click()
@@ -447,10 +482,10 @@ void poker_client::on_bet_click()
   // bet current amount
   //assert(bet >= comm->current_bet);
   Player* player = players[ main_player ];
+  int bet_value = bet_value_slider->get_value();
+  player->set_current_bet( bet_value );
   player->set_message("I bet !");
-  player->set_current_bet(bet_value_slider->get_value() - player->get_total_bet());
   player->set_action("bet");
-  player->set_total_bet(bet_value_slider->get_value());
   make_json(player);
   reset_sensitivity();
 }
@@ -460,9 +495,8 @@ void poker_client::on_call_click()
   // set total bet to bet value slider
   Player* player = players[ main_player ];
   player->set_message("I'll call!");
-  player->set_current_bet(bet_value_slider->get_value() - player->get_total_bet());
+  player->set_current_bet( comm->current_bet );
   player->set_action("call");
-  player->set_total_bet(bet_value_slider->get_value());
   make_json(player);
   reset_sensitivity();
 }

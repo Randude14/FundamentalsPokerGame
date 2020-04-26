@@ -753,7 +753,7 @@ void Game::write_game_state(nlohmann::json& to_player)
   }
   
   // write the game attributes
-  to_player["prize_pot"] = prize_pot;
+  to_player["prize_pot"] = (long)prize_pot;
   to_player["current_bet"] = current_bet;
   to_player["game_stage"] = game_stage;
   to_player["game_comment"] = game_comment;
