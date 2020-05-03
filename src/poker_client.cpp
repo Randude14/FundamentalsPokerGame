@@ -221,6 +221,7 @@ int poker_client::run()
   auto main_app = Gtk::Application::create(appname);
   Glib::signal_idle().connect( sigc::mem_fun(*this, &poker_client::idle_handler) );
   XInitThreads();
+  reset_sensitivity();
   int ret = main_app->run(*main_window);
   
   this->close();
