@@ -57,11 +57,12 @@ void Dealer::process(nlohmann::json& to_dealer, nlohmann::json& to_player)
     if(game.player_join(player))
     {
       std::cout << "Player " << name << " with " << uuid << " joined." << std::endl;
-    }
-    
-    if( game.min_players() )
-    {
-      game.start_game();
+      
+      // game is waiting for players, then start if min players is met
+      if( game.min_players() && game.is_idle() )
+      {
+        game.start_game();
+      }
     }
   }
   // player inputs from a player currently in the game
