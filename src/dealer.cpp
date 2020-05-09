@@ -31,7 +31,10 @@ bool Dealer::game_ended()
 
 void Dealer::restart_game(nlohmann::json& to_player)
 {
-  game.start_game(); // start game again
+  if( game.min_players() )
+  {
+    game.start_game(); // start game again
+  }
   game.write_game_state(to_player);
   ended = false;
 }

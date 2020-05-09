@@ -66,7 +66,6 @@ void client_communicator::message_readin(std::string message)
   
   client->num_players = to_player["player_total"];
   pot = to_player["prize_pot"];
-  std::cout << "Current Pot: " << pot << std::endl;
   current_bet = to_player["current_bet"];
   game_status = to_player["game_comment"];
   auto players = client->players;

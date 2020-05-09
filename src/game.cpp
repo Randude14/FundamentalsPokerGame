@@ -571,9 +571,29 @@ void Game::end_game()
     double wallet = winner->get_wallet();
     wallet += prize_pot;
     winner->set_wallet(wallet);
+    std::cout << winner->get_name() << " " << winner->get_wallet() << std::endl;
     
     game_comment = winner->get_name() + " has won!";
     std::cout << game_comment << std::endl;
+  }
+  
+  // remove players that don't have wallets
+  for(unsigned int i = 0; i < players.size(); i++)
+  {
+    Player* player = &players[i];
+    std::cout << player->get_name() << " " << player->get_wallet() << std::endl;
+    if(player->get_wallet() <= 0)
+    {
+      // give cards back
+      auto hand = player->get_hand();
+      for(unsigned int j = 0; j < hand.size(); j++)
+      {
+        discard_pile.push_back( hand[j] );
+        std::cout << hand[j].get_int_suit() << " " << hand[j].get_int_value() << std::endl;
+      }
+      
+      players.erase( players.begin()+i );
+    }
   }
   
   showcards = true;

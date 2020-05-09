@@ -55,6 +55,7 @@ class poker_client
     void connection_failed();
     
     bool idle_handler(); // called by glib when nothing else is happening
+    bool window_close(GdkEventAny* ); // called by glib when nothing else is happening
     
     // player list
     Player* players[MAX_PLAYERS];
@@ -109,6 +110,7 @@ class poker_client
   private:
     
     // References for the UI widgets
+    Glib::RefPtr<Gtk::Application> main_app;
     Gtk::Window *main_window;
     Gtk::Range *bet_value_slider;
     Gtk::Button *check_button;    

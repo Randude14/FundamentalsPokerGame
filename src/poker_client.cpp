@@ -218,12 +218,14 @@ int poker_client::run()
   // Run the window
   std::string appname = APP_NAME;
   appname += std::string(".") + playername;
-  auto main_app = Gtk::Application::create(appname);
+  main_app = Gtk::Application::create(appname);
   Glib::signal_idle().connect( sigc::mem_fun(*this, &poker_client::idle_handler) );
+  main_window->signal_delete_event().connect( sigc::mem_fun(*this, &poker_client::window_close) );
   XInitThreads();
   reset_sensitivity();
   int ret = main_app->run(*main_window);
   
+  std::cout << "Closing..." << std::endl;
   this->close();
 
   // return exit status
@@ -254,11 +256,18 @@ void poker_client::close()
   std::cout << std::endl << "Client has been closed." << std::endl;
 }
 
+// close window
+bool poker_client::window_close(GdkEventAny* event)
+{
+  main_app->quit();
+  return false;
+}
+
 // called by the communication thread when a connection failed
 // close the main window, this will trigger the app->run() to terminate and clean exit
 void poker_client::connection_failed()
 {
-  main_window->close();
+  main_app->quit();
 }
 
 
